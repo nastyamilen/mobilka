@@ -2,6 +2,7 @@ package com.example.mobiiilkaaaaa;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
@@ -9,26 +10,39 @@ import android.widget.Button;
 import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String PREFS_NAME = "MatchThreePrefs";
     private static final int GRID_SIZE = 8;
-    private static final int MATCH_MIN = 3;
-    private static final String PREFS_NAME = "GamePrefs";
     private static final String GAME_STATE_KEY = "gameState";
     private static final String SCORE_KEY = "score";
+    private static final String TIMER_KEY = "timer";
+    private static final long INITIAL_TIME = 60000; // 1 минута в миллисекундах
+    private static final long TIME_BONUS = 30000; // 30 секунд в миллисекундах
+    private static final int SCORE_FOR_BONUS = 2000; // Очки для бонуса времени
     
     private GridView gridView;
     private TextView scoreTextView;
+    private TextView timerTextView;
     private GameAdapter gameAdapter;
     private int score = 0;
     private int selectedPosition = -1;
     private boolean isAnimating = false;
     private Handler handler = new Handler();
     private boolean continueGame = false;
+    
+    // Переменные для таймера
+    private CountDownTimer gameTimer;
+    private long timeLeftInMillis = INITIAL_TIME;
+    private boolean timerRunning = false;
+    private int lastBonusThreshold = 0; // Последний порог для бонуса времени
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
 
         gridView = findViewById(R.id.gridView);
         scoreTextView = findViewById(R.id.scoreTextView);
+        timerTextView = findViewById(R.id.timerTextView);
         
         // Устанавливаем размеры ячеек GridView
         int screenWidth = getResources().getDisplayMetrics().widthPixels;
@@ -61,6 +76,8 @@ public class MainActivity extends AppCompatActivity {
         } else {
             // Начинаем новую игру
             updateScore(0);
+            timeLeftInMillis = INITIAL_TIME;
+            updateTimerText();
             gridView.setAdapter(gameAdapter);
             Log.d("MainActivity", "GridView adapter set");
         }
@@ -71,6 +88,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Сохраняем состояние игры перед выходом
+                pauseTimer();
                 saveGameState();
                 finish(); // Закрываем текущую активность и возвращаемся в предыдущую (главное меню)
             }
@@ -78,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
 
         gridView.setOnItemClickListener((parent, view, position, id) -> {
             Log.d("MainActivity", "Item clicked at position: " + position);
-            if (isAnimating) {
+            if (isAnimating || !timerRunning) {
                 return;
             }
 
@@ -99,6 +117,9 @@ public class MainActivity extends AppCompatActivity {
                 selectedPosition = -1;
             }
         });
+        
+        // Запускаем таймер
+        startTimer();
     }
 
     private boolean isAdjacent(int pos1, int pos2) {
@@ -217,6 +238,21 @@ public class MainActivity extends AppCompatActivity {
     private void updateScore(int points) {
         score += points;
         scoreTextView.setText("Счет: " + score);
+        
+        // Проверяем, достигнут ли порог для добавления времени
+        int bonusThreshold = (score / SCORE_FOR_BONUS) * SCORE_FOR_BONUS;
+        if (bonusThreshold > lastBonusThreshold) {
+            // Добавляем бонусное время
+            timeLeftInMillis += TIME_BONUS;
+            lastBonusThreshold = bonusThreshold;
+            
+            // Обновляем таймер
+            updateTimerText();
+            
+            // Показываем уведомление о добавлении времени
+            Toast.makeText(this, "Бонус! +30 секунд!", Toast.LENGTH_SHORT).show();
+            Log.d("MainActivity", "Time bonus added: +30 seconds. New time: " + timeLeftInMillis);
+        }
     }
 
     private void saveGameState() {
@@ -224,6 +260,7 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences.Editor editor = prefs.edit();
         editor.putInt(SCORE_KEY, score);
         editor.putString(GAME_STATE_KEY, gameAdapter.saveGameState());
+        editor.putLong(TIMER_KEY, timeLeftInMillis);
         editor.apply();
         Log.d("MainActivity", "Game state saved. Score: " + score);
     }
@@ -240,6 +277,9 @@ public class MainActivity extends AppCompatActivity {
             Log.d("MainActivity", "Game state loaded. Score: " + score);
         }
         
+        timeLeftInMillis = prefs.getLong(TIMER_KEY, INITIAL_TIME);
+        updateTimerText();
+        
         gridView.setAdapter(gameAdapter);
         Log.d("MainActivity", "GridView adapter set");
         
@@ -252,21 +292,85 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private void startTimer() {
+        gameTimer = new CountDownTimer(timeLeftInMillis, 1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                timeLeftInMillis = millisUntilFinished;
+                updateTimerText();
+            }
+
+            @Override
+            public void onFinish() {
+                timerRunning = false;
+                Log.d("MainActivity", "Timer finished");
+                // Показываем диалоговое окно с результатом
+                showResultDialog();
+            }
+        }.start();
+        timerRunning = true;
+    }
+
+    private void pauseTimer() {
+        gameTimer.cancel();
+        timerRunning = false;
+    }
+
+    private void updateTimerText() {
+        int minutes = (int) (timeLeftInMillis / 1000) / 60;
+        int seconds = (int) (timeLeftInMillis / 1000) % 60;
+        String timeText = String.format("Время: %02d:%02d", minutes, seconds);
+        timerTextView.setText(timeText);
+    }
+
+    private void showResultDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Результат");
+        builder.setMessage("Ваш результат: " + score + " очков");
+        builder.setPositiveButton("OK", (dialog, which) -> {
+            // Сохраняем результат в базу данных
+            DatabaseHelper dbHelper = DatabaseHelper.getInstance(this);
+            dbHelper.addScore(score);
+            Log.d("MainActivity", "Score saved to database: " + score);
+            finish(); // Закрываем текущую активность и возвращаемся в предыдущую (главное меню)
+        });
+        builder.show();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Возобновляем таймер, если он был приостановлен
+        if (!timerRunning && timeLeftInMillis > 0) {
+            startTimer();
+            Log.d("MainActivity", "Timer resumed on onResume. Time left: " + timeLeftInMillis);
+        }
+    }
+    
     @Override
     protected void onPause() {
         super.onPause();
-        // Сохраняем состояние игры
+        // Останавливаем таймер и сохраняем состояние игры
+        if (timerRunning) {
+            pauseTimer();
+            Log.d("MainActivity", "Timer paused on onPause. Time left: " + timeLeftInMillis);
+        }
         saveGameState();
     }
     
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Сохраняем результат в базу данных
-        if (score > 0) {
+        // Если таймер все еще работает при уничтожении активности, останавливаем его
+        if (timerRunning) {
+            pauseTimer();
+        }
+        
+        // Сохраняем результат в базу данных только если игра закончилась естественным путем (таймер истек)
+        if (score > 0 && timeLeftInMillis <= 0) {
             DatabaseHelper dbHelper = DatabaseHelper.getInstance(this);
             dbHelper.addScore(score);
-            Log.d("MainActivity", "Score saved to database: " + score);
+            Log.d("MainActivity", "Score saved to database on onDestroy: " + score);
         }
     }
 }
