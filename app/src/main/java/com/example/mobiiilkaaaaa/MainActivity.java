@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -34,6 +35,15 @@ public class MainActivity extends AppCompatActivity {
         gameAdapter = new GameAdapter(this, GRID_SIZE);
         gridView.setAdapter(gameAdapter);
         Log.d("MainActivity", "GridView adapter set");
+
+        // Настройка кнопки возврата в главное меню
+        Button backToMenuButton = findViewById(R.id.backToMenuButton);
+        backToMenuButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish(); // Закрываем текущую активность и возвращаемся в предыдущую (главное меню)
+            }
+        });
 
         gridView.setOnItemClickListener((parent, view, position, id) -> {
             Log.d("MainActivity", "Item clicked at position: " + position);

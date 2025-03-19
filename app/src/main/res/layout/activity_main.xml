@@ -15,23 +15,32 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="16dp"/>
 
+    <!-- Кнопка возврата в главное меню -->
+    <Button
+        android:id="@+id/backToMenuButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="В главное меню"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_marginBottom="16dp"/>
+
     <!-- Игровое поле -->
     <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_below="@id/scoreTextView"
-        android:layout_centerHorizontal="true"
+        android:layout_centerInParent="true"
         android:background="@drawable/border">
 
         <GridView
             android:id="@+id/gridView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:numColumns="8"
             android:horizontalSpacing="4dp"
             android:verticalSpacing="4dp"
             android:gravity="center"
-            android:stretchMode="columnWidth"
             android:layout_gravity="center"
             android:padding="8dp" />
     </FrameLayout>

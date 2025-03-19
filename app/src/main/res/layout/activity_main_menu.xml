@@ -4,11 +4,36 @@
     android:layout_height="match_parent"
     android:padding="16dp">
 
-    <Button
-        android:id="@+id/startButton"
+    <TextView
+        android:id="@+id/titleTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Начать игру"
-        android:layout_centerInParent="true" />
+        android:text="Match-3 Game"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="50dp"
+        android:layout_marginBottom="50dp"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_centerInParent="true"
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/startButton"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:text="Начать игру"
+            android:layout_marginBottom="16dp" />
+
+        <Button
+            android:id="@+id/continueButton"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:text="Продолжить игру" />
+    </LinearLayout>
 
 </RelativeLayout>
