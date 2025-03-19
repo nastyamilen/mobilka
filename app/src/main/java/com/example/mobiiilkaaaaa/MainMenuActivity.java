@@ -45,6 +45,7 @@ public class MainMenuActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainMenuActivity.this, MainActivity.class);
+                intent.putExtra("continueGame", true);
                 startActivity(intent);
             }
         });

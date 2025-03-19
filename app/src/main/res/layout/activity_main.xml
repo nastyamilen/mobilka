@@ -15,18 +15,9 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="16dp"/>
 
-    <!-- Кнопка возврата в главное меню -->
-    <Button
-        android:id="@+id/backToMenuButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="В главное меню"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_marginBottom="16dp"/>
-
     <!-- Игровое поле -->
     <FrameLayout
+        android:id="@+id/gameFrameLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/scoreTextView"
@@ -44,4 +35,15 @@
             android:layout_gravity="center"
             android:padding="8dp" />
     </FrameLayout>
+    
+    <!-- Кнопка возврата в главное меню -->
+    <Button
+        android:id="@+id/backToMenuButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="В главное меню"
+        android:layout_below="@id/gameFrameLayout"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"/>
+
 </RelativeLayout>

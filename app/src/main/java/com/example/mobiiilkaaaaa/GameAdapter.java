@@ -229,4 +229,42 @@ public class GameAdapter extends BaseAdapter {
 
         return imageView;
     }
+
+    // Методы для сохранения и загрузки состояния игры
+    public String saveGameState() {
+        StringBuilder state = new StringBuilder();
+        for (Integer gem : gems) {
+            state.append(gem == null ? "null" : gem).append(",");
+        }
+        return state.toString();
+    }
+    
+    public void loadGameState(String state) {
+        if (state == null || state.isEmpty()) {
+            initializeBoard();
+            return;
+        }
+        
+        String[] gemStates = state.split(",");
+        for (int i = 0; i < Math.min(gemStates.length, gems.length); i++) {
+            if (gemStates[i].equals("null")) {
+                gems[i] = null;
+            } else {
+                try {
+                    gems[i] = Integer.parseInt(gemStates[i]);
+                } catch (NumberFormatException e) {
+                    gems[i] = getRandomGem();
+                }
+            }
+        }
+        
+        // Если сохраненное состояние короче текущего массива, заполняем оставшиеся ячейки
+        if (gemStates.length < gems.length) {
+            for (int i = gemStates.length; i < gems.length; i++) {
+                gems[i] = getRandomGem();
+            }
+        }
+        
+        notifyDataSetChanged();
+    }
 }

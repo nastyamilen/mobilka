@@ -1,5 +1,6 @@
 package com.example.mobiiilkaaaaa;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -13,6 +14,9 @@ import androidx.appcompat.app.AppCompatActivity;
 public class MainActivity extends AppCompatActivity {
     private static final int GRID_SIZE = 8;
     private static final int MATCH_MIN = 3;
+    private static final String PREFS_NAME = "GamePrefs";
+    private static final String GAME_STATE_KEY = "gameState";
+    private static final String SCORE_KEY = "score";
     
     private GridView gridView;
     private TextView scoreTextView;
@@ -21,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
     private int selectedPosition = -1;
     private boolean isAnimating = false;
     private Handler handler = new Handler();
+    private boolean continueGame = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,18 +34,32 @@ public class MainActivity extends AppCompatActivity {
 
         gridView = findViewById(R.id.gridView);
         scoreTextView = findViewById(R.id.scoreTextView);
-        updateScore(0);
-
-        Log.d("MainActivity", "Creating GameAdapter with grid size: " + GRID_SIZE);
-        gameAdapter = new GameAdapter(this, GRID_SIZE);
-        gridView.setAdapter(gameAdapter);
-        Log.d("MainActivity", "GridView adapter set");
+        
+        // Проверяем, нужно ли продолжить предыдущую игру
+        Bundle extras = getIntent().getExtras();
+        if (extras != null) {
+            continueGame = extras.getBoolean("continueGame", false);
+        }
+        
+        if (continueGame) {
+            // Загружаем сохраненное состояние игры
+            loadGameState();
+        } else {
+            // Начинаем новую игру
+            updateScore(0);
+            Log.d("MainActivity", "Creating GameAdapter with grid size: " + GRID_SIZE);
+            gameAdapter = new GameAdapter(this, GRID_SIZE);
+            gridView.setAdapter(gameAdapter);
+            Log.d("MainActivity", "GridView adapter set");
+        }
 
         // Настройка кнопки возврата в главное меню
         Button backToMenuButton = findViewById(R.id.backToMenuButton);
         backToMenuButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Сохраняем состояние игры перед выходом
+                saveGameState();
                 finish(); // Закрываем текущую активность и возвращаемся в предыдущую (главное меню)
             }
         });
@@ -177,5 +196,33 @@ public class MainActivity extends AppCompatActivity {
     private void updateScore(int points) {
         score += points;
         scoreTextView.setText("Счет: " + score);
+    }
+
+    private void saveGameState() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putInt(SCORE_KEY, score);
+        editor.putString(GAME_STATE_KEY, gameAdapter.saveGameState());
+        editor.apply();
+        Log.d("MainActivity", "Game state saved. Score: " + score);
+    }
+
+    private void loadGameState() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        score = prefs.getInt(SCORE_KEY, 0);
+        updateScore(0);
+        
+        Log.d("MainActivity", "Creating GameAdapter with grid size: " + GRID_SIZE);
+        gameAdapter = new GameAdapter(this, GRID_SIZE);
+        
+        // Загружаем состояние камней
+        String gameState = prefs.getString(GAME_STATE_KEY, "");
+        if (!gameState.isEmpty()) {
+            gameAdapter.loadGameState(gameState);
+            Log.d("MainActivity", "Game state loaded. Score: " + score);
+        }
+        
+        gridView.setAdapter(gameAdapter);
+        Log.d("MainActivity", "GridView adapter set");
     }
 }
