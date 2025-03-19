@@ -112,15 +112,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void trySwap(int pos1, int pos2) {
+        // Дополнительная проверка на валидность позиций
+        if (pos1 < 0 || pos1 >= GRID_SIZE * GRID_SIZE || pos2 < 0 || pos2 >= GRID_SIZE * GRID_SIZE) {
+            Log.e("MainActivity", "Invalid positions: " + pos1 + ", " + pos2);
+            return;
+        }
+        
         isAnimating = true;
         gameAdapter.swapItems(pos1, pos2);
+        
+        Log.d("MainActivity", "Swapping items at positions: " + pos1 + ", " + pos2);
 
         handler.postDelayed(() -> {
             if (checkForMatches()) {
                 // Valid move
+                Log.d("MainActivity", "Valid move - matches found");
                 processMatches();
             } else {
                 // Invalid move - swap back
+                Log.d("MainActivity", "Invalid move - no matches found, swapping back");
                 gameAdapter.swapItems(pos1, pos2);
                 isAnimating = false;
             }
@@ -128,27 +138,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean checkForMatches() {
-        return gameAdapter.isPartOfMatch(0) || 
-               gameAdapter.isPartOfMatch(1) || 
-               gameAdapter.isPartOfMatch(2) || 
-               gameAdapter.isPartOfMatch(3) || 
-               gameAdapter.isPartOfMatch(4) || 
-               gameAdapter.isPartOfMatch(5) || 
-               gameAdapter.isPartOfMatch(6) || 
-               gameAdapter.isPartOfMatch(7) || 
-               gameAdapter.isPartOfMatch(8) || 
-               gameAdapter.isPartOfMatch(9) || 
-               gameAdapter.isPartOfMatch(10) || 
-               gameAdapter.isPartOfMatch(11) || 
-               gameAdapter.isPartOfMatch(12) || 
-               gameAdapter.isPartOfMatch(13) || 
-               gameAdapter.isPartOfMatch(14) || 
-               gameAdapter.isPartOfMatch(15);
+        // Проверяем все позиции в сетке
+        for (int position = 0; position < GRID_SIZE * GRID_SIZE; position++) {
+            if (gameAdapter.isPartOfMatch(position)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void processMatches() {
         boolean foundMatch = false;
         Set<Integer> processedPositions = new HashSet<>();
+        
+        Log.d("MainActivity", "Processing matches...");
 
         // Проверяем все возможные начальные позиции
         for (int position = 0; position < GRID_SIZE * GRID_SIZE; position++) {
@@ -164,10 +167,12 @@ public class MainActivity extends AppCompatActivity {
                 }
                 
                 // Обновляем счет (10 очков за каждый элемент)
-                updateScore(horizontalMatches.size() * 10);
+                int scoreToAdd = horizontalMatches.size() * 10;
+                updateScore(scoreToAdd);
                 foundMatch = true;
                 
-                Log.d("MainActivity", "Horizontal match found with " + horizontalMatches.size() + " gems");
+                Log.d("MainActivity", "Horizontal match found with " + horizontalMatches.size() + 
+                                     " gems starting at position " + position + ". Added " + scoreToAdd + " points.");
             }
             
             List<Integer> verticalMatches = gameAdapter.getVerticalMatchPositions(position);
@@ -180,25 +185,31 @@ public class MainActivity extends AppCompatActivity {
                 }
                 
                 // Обновляем счет (10 очков за каждый элемент)
-                updateScore(verticalMatches.size() * 10);
+                int scoreToAdd = verticalMatches.size() * 10;
+                updateScore(scoreToAdd);
                 foundMatch = true;
                 
-                Log.d("MainActivity", "Vertical match found with " + verticalMatches.size() + " gems");
+                Log.d("MainActivity", "Vertical match found with " + verticalMatches.size() + 
+                                     " gems starting at position " + position + ". Added " + scoreToAdd + " points.");
             }
         }
 
         if (foundMatch) {
+            Log.d("MainActivity", "Matches found. Dropping gems...");
             handler.postDelayed(() -> {
                 gameAdapter.dropGems();
                 handler.postDelayed(() -> {
                     if (checkForMatches()) {
+                        Log.d("MainActivity", "Matches found after dropping gems. Processing again...");
                         processMatches();
                     } else {
+                        Log.d("MainActivity", "No more matches found. Ending turn.");
                         isAnimating = false;
                     }
                 }, 300);
             }, 300);
         } else {
+            Log.d("MainActivity", "No matches found. Ending turn.");
             isAnimating = false;
         }
     }

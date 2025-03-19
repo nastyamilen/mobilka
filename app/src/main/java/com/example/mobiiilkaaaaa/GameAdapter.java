@@ -104,7 +104,7 @@ public class GameAdapter extends BaseAdapter {
         return false;
     }
 
-    private boolean isPartOfMatch(int position) {
+    public boolean isPartOfMatch(int position) {
         return isHorizontalMatch(position) || isVerticalMatch(position);
     }
 
@@ -141,9 +141,14 @@ public class GameAdapter extends BaseAdapter {
         for (int i = 3; col + i < gridSize; i++) {
             if (gems[position + i] != null && gems[position].equals(gems[position + i])) {
                 positions.add(position + i);
+                Log.d("GameAdapter", "Found additional horizontal match at position " + (position + i));
             } else {
                 break;
             }
+        }
+        
+        if (positions.size() > 3) {
+            Log.d("GameAdapter", "Found horizontal match with " + positions.size() + " gems starting at position " + position);
         }
         
         return positions;
@@ -173,9 +178,14 @@ public class GameAdapter extends BaseAdapter {
         for (int i = 3; row + i < gridSize; i++) {
             if (gems[position + gridSize * i] != null && gems[position].equals(gems[position + gridSize * i])) {
                 positions.add(position + gridSize * i);
+                Log.d("GameAdapter", "Found additional vertical match at position " + (position + gridSize * i));
             } else {
                 break;
             }
+        }
+        
+        if (positions.size() > 3) {
+            Log.d("GameAdapter", "Found vertical match with " + positions.size() + " gems starting at position " + position);
         }
         
         return positions;
@@ -191,6 +201,15 @@ public class GameAdapter extends BaseAdapter {
     }
 
     public void swapItems(int pos1, int pos2) {
+        if (pos1 < 0 || pos1 >= gems.length || pos2 < 0 || pos2 >= gems.length) {
+            Log.e("GameAdapter", "Invalid positions for swap: " + pos1 + ", " + pos2);
+            return;
+        }
+        
+        Log.d("GameAdapter", "Swapping gems at positions " + pos1 + " and " + pos2);
+        Log.d("GameAdapter", "Gem at pos1: " + (gems[pos1] == null ? "null" : gems[pos1]) + 
+                            ", Gem at pos2: " + (gems[pos2] == null ? "null" : gems[pos2]));
+        
         Integer temp = gems[pos1];
         gems[pos1] = gems[pos2];
         gems[pos2] = temp;
@@ -198,17 +217,25 @@ public class GameAdapter extends BaseAdapter {
     }
 
     public void removeGem(int position) {
+        if (position < 0 || position >= gems.length) {
+            Log.e("GameAdapter", "Invalid position for removeGem: " + position);
+            return;
+        }
+        
         // Special case for first gem - replace it with a new gem instead of setting to null
         if (position == 0) {
             gems[position] = getRandomGem();
             Log.d("GameAdapter", "First gem replaced instead of removed: " + gems[position]);
         } else {
+            Log.d("GameAdapter", "Removing gem at position " + position + ": " + 
+                               (gems[position] == null ? "null" : gems[position]));
             gems[position] = null;
         }
         notifyDataSetChanged();
     }
 
     public void dropGems() {
+        Log.d("GameAdapter", "Dropping gems...");
         // Process each column
         for (int col = 0; col < gridSize; col++) {
             int emptyRow = gridSize - 1;
@@ -216,9 +243,24 @@ public class GameAdapter extends BaseAdapter {
             // Move existing gems down
             for (int row = gridSize - 1; row >= 0; row--) {
                 int pos = row * gridSize + col;
+                
+                if (pos < 0 || pos >= gems.length) {
+                    Log.e("GameAdapter", "Invalid position during drop: " + pos);
+                    continue;
+                }
+                
                 if (gems[pos] != null) {
-                    if (row != emptyRow) {
-                        gems[emptyRow * gridSize + col] = gems[pos];
+                    if (emptyRow != row) {
+                        // Move this gem down to the empty space
+                        int emptyPos = emptyRow * gridSize + col;
+                        
+                        if (emptyPos < 0 || emptyPos >= gems.length) {
+                            Log.e("GameAdapter", "Invalid empty position during drop: " + emptyPos);
+                            continue;
+                        }
+                        
+                        Log.d("GameAdapter", "Moving gem from position " + pos + " to " + emptyPos);
+                        gems[emptyPos] = gems[pos];
                         gems[pos] = null;
                     }
                     emptyRow--;
@@ -227,7 +269,15 @@ public class GameAdapter extends BaseAdapter {
             
             // Fill empty spaces with new gems
             for (int row = emptyRow; row >= 0; row--) {
-                gems[row * gridSize + col] = getRandomGem();
+                int pos = row * gridSize + col;
+                
+                if (pos < 0 || pos >= gems.length) {
+                    Log.e("GameAdapter", "Invalid position when filling empty spaces: " + pos);
+                    continue;
+                }
+                
+                gems[pos] = getRandomGem();
+                Log.d("GameAdapter", "Added new gem at position " + pos + ": " + gems[pos]);
             }
         }
         
@@ -237,6 +287,7 @@ public class GameAdapter extends BaseAdapter {
             Log.d("GameAdapter", "Ensuring first gem is initialized after drop: " + gems[0]);
         }
         
+        Log.d("GameAdapter", "Finished dropping gems");
         notifyDataSetChanged();
     }
 
