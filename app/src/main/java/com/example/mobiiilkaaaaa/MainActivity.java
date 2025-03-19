@@ -1,158 +1,167 @@
 package com.example.mobiiilkaaaaa;
 
 import android.os.Bundle;
-import android.util.Log;
+import android.os.Handler;
+import android.view.View;
 import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
-
-    private ImageAdapter adapter;
-    private int selectedPosition = -1; // Позиция выбранного элемента (-1 означает, что ничего не выбрано)
-    private int score = 0; // Счет игры
-    private TextView scoreTextView; // TextView для отображения счета
-    private boolean isProcessingMatches = false; // Флаг для отслеживания обработки совпадений
+    private static final int GRID_SIZE = 8;
+    private static final int MATCH_MIN = 3;
+    
+    private GridView gridView;
+    private TextView scoreTextView;
+    private GameAdapter gameAdapter;
+    private int score = 0;
+    private int selectedPosition = -1;
+    private boolean isAnimating = false;
+    private Handler handler = new Handler();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        GridView gridView = findViewById(R.id.gridView);
+        gridView = findViewById(R.id.gridView);
         scoreTextView = findViewById(R.id.scoreTextView);
-        adapter = new ImageAdapter(this);
-        gridView.setAdapter(adapter);
+        updateScore(0);
 
-        // Обработка кликов на элементы GridView
+        gameAdapter = new GameAdapter(this, GRID_SIZE);
+        gridView.setAdapter(gameAdapter);
+
         gridView.setOnItemClickListener((parent, view, position, id) -> {
-            if (isProcessingMatches) {
-                // Если сейчас обрабатываются совпадения, игнорируем клик
-                Toast.makeText(MainActivity.this, "Подождите, идет обработка...", Toast.LENGTH_SHORT).show();
+            if (isAnimating) {
                 return;
             }
 
             if (selectedPosition == -1) {
-                // Если ничего не выбрано, выбираем текущий элемент
+                // First selection
                 selectedPosition = position;
-                Toast.makeText(MainActivity.this, "Выбран элемент: " + position, Toast.LENGTH_SHORT).show();
+                view.setAlpha(0.6f);
             } else {
-                // Если уже выбран элемент, проверяем, допустим ли обмен
-                if (isSwapValid(selectedPosition, position)) {
-                    // Меняем элементы местами с анимацией
-                    adapter.swapItemsWithAnimation(selectedPosition, position, () -> {
-                        selectedPosition = -1; // Сбрасываем выбор
-                        isProcessingMatches = true; // Начинаем обработку совпадений
-                        checkMatches(); // Проверяем совпадения после обмена
-                    });
-                } else {
-                    // Обмен недопустим, сбрасываем выбор
-                    selectedPosition = -1;
-                    Toast.makeText(MainActivity.this, "Недопустимый обмен", Toast.LENGTH_SHORT).show();
+                // Second selection - try to swap
+                View firstView = gridView.getChildAt(selectedPosition - gridView.getFirstVisiblePosition());
+                if (firstView != null) {
+                    firstView.setAlpha(1.0f);
                 }
+
+                if (isAdjacent(selectedPosition, position)) {
+                    trySwap(selectedPosition, position);
+                }
+                selectedPosition = -1;
             }
         });
     }
 
-    // Обновление счета
+    private boolean isAdjacent(int pos1, int pos2) {
+        int row1 = pos1 / GRID_SIZE;
+        int col1 = pos1 % GRID_SIZE;
+        int row2 = pos2 / GRID_SIZE;
+        int col2 = pos2 % GRID_SIZE;
+
+        return (Math.abs(row1 - row2) == 1 && col1 == col2) ||
+               (Math.abs(col1 - col2) == 1 && row1 == row2);
+    }
+
+    private void trySwap(int pos1, int pos2) {
+        isAnimating = true;
+        gameAdapter.swapItems(pos1, pos2);
+
+        handler.postDelayed(() -> {
+            if (checkForMatches()) {
+                // Valid move
+                processMatches();
+            } else {
+                // Invalid move - swap back
+                gameAdapter.swapItems(pos1, pos2);
+                isAnimating = false;
+            }
+        }, 300);
+    }
+
+    private boolean checkForMatches() {
+        // Check rows
+        for (int row = 0; row < GRID_SIZE; row++) {
+            for (int col = 0; col < GRID_SIZE - 2; col++) {
+                int pos = row * GRID_SIZE + col;
+                if (checkMatch(pos, pos + 1, pos + 2)) {
+                    return true;
+                }
+            }
+        }
+
+        // Check columns
+        for (int col = 0; col < GRID_SIZE; col++) {
+            for (int row = 0; row < GRID_SIZE - 2; row++) {
+                int pos = row * GRID_SIZE + col;
+                if (checkMatch(pos, pos + GRID_SIZE, pos + GRID_SIZE * 2)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private boolean checkMatch(int pos1, int pos2, int pos3) {
+        Integer gem1 = gameAdapter.getItemId(pos1);
+        Integer gem2 = gameAdapter.getItemId(pos2);
+        Integer gem3 = gameAdapter.getItemId(pos3);
+        return gem1 != null && gem1.equals(gem2) && gem1.equals(gem3);
+    }
+
+    private void processMatches() {
+        boolean foundMatch = false;
+
+        // Check and remove horizontal matches
+        for (int row = 0; row < GRID_SIZE; row++) {
+            for (int col = 0; col < GRID_SIZE - 2; col++) {
+                int pos = row * GRID_SIZE + col;
+                if (checkMatch(pos, pos + 1, pos + 2)) {
+                    gameAdapter.removeGem(pos);
+                    gameAdapter.removeGem(pos + 1);
+                    gameAdapter.removeGem(pos + 2);
+                    foundMatch = true;
+                    updateScore(30);
+                }
+            }
+        }
+
+        // Check and remove vertical matches
+        for (int col = 0; col < GRID_SIZE; col++) {
+            for (int row = 0; row < GRID_SIZE - 2; row++) {
+                int pos = row * GRID_SIZE + col;
+                if (checkMatch(pos, pos + GRID_SIZE, pos + GRID_SIZE * 2)) {
+                    gameAdapter.removeGem(pos);
+                    gameAdapter.removeGem(pos + GRID_SIZE);
+                    gameAdapter.removeGem(pos + GRID_SIZE * 2);
+                    foundMatch = true;
+                    updateScore(30);
+                }
+            }
+        }
+
+        if (foundMatch) {
+            handler.postDelayed(() -> {
+                gameAdapter.dropGems();
+                handler.postDelayed(() -> {
+                    if (checkForMatches()) {
+                        processMatches();
+                    } else {
+                        isAnimating = false;
+                    }
+                }, 300);
+            }, 300);
+        } else {
+            isAnimating = false;
+        }
+    }
+
     private void updateScore(int points) {
         score += points;
         scoreTextView.setText("Счет: " + score);
-    }
-
-    // Проверка, допустим ли обмен
-    private boolean isSwapValid(int position1, int position2) {
-        // Проверяем, что позиции соседние (по горизонтали или вертикали)
-        int row1 = position1 / 8;
-        int col1 = position1 % 8;
-        int row2 = position2 / 8;
-        int col2 = position2 % 8;
-        
-        boolean isAdjacent = (Math.abs(row1 - row2) == 1 && col1 == col2) || 
-                            (Math.abs(col1 - col2) == 1 && row1 == row2);
-        
-        if (!isAdjacent) {
-            return false;
-        }
-
-        // Временно меняем элементы местами
-        adapter.swapItems(position1, position2);
-
-        // Проверяем, есть ли совпадения после обмена
-        boolean hasMatches = checkMatches();
-
-        // Возвращаем элементы на место
-        adapter.swapItems(position1, position2);
-
-        return hasMatches;
-    }
-
-    // Метод для проверки совпадений
-    private boolean checkMatches() {
-        boolean hasMatches = false;
-
-        // Проверяем строки
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 6; j++) { // Проверяем до 6-го элемента, чтобы не выйти за границы
-                int position = i * 8 + j;
-                if (checkRow(position)) {
-                    // Найдено совпадение в строке
-                    Log.d("Match", "Совпадение в строке: " + i);
-                    hasMatches = true;
-                    // Удаляем совпадающие элементы с анимацией
-                    adapter.removeItemsWithAnimation(new int[]{position, position + 1, position + 2}, () -> {
-                        updateScore(10); // Добавляем 10 очков за совпадение
-                        fillEmptySpaces(); // Заполняем пустоты
-                    });
-                }
-            }
-        }
-
-        // Проверяем столбцы
-        for (int j = 0; j < 8; j++) {
-            for (int i = 0; i < 6; i++) { // Проверяем до 6-го элемента, чтобы не выйти за границы
-                int position = i * 8 + j;
-                if (checkColumn(position)) {
-                    // Найдено совпадение в столбце
-                    Log.d("Match", "Совпадение в столбце: " + j);
-                    hasMatches = true;
-                    // Удаляем совпадающие элементы с анимацией
-                    adapter.removeItemsWithAnimation(new int[]{position, position + 8, position + 16}, () -> {
-                        updateScore(10); // Добавляем 10 очков за совпадение
-                        fillEmptySpaces(); // Заполняем пустоты
-                    });
-                }
-            }
-        }
-
-        if (!hasMatches) {
-            // Если совпадений нет, завершаем обработку
-            isProcessingMatches = false;
-        }
-
-        return hasMatches;
-    }
-
-    // Метод для заполнения пустот
-    private void fillEmptySpaces() {
-        adapter.fillEmptySpaces(() -> {
-            // После заполнения пустот завершаем обработку
-            isProcessingMatches = false;
-        });
-    }
-
-    // Проверка совпадений в строке (3 одинаковых элемента подряд)
-    private boolean checkRow(int position) {
-        return adapter.getItem(position) != null &&
-                adapter.getItem(position).equals(adapter.getItem(position + 1)) &&
-                adapter.getItem(position).equals(adapter.getItem(position + 2));
-    }
-
-    // Проверка совпадений в столбце (3 одинаковых элемента подряд)
-    private boolean checkColumn(int position) {
-        return adapter.getItem(position) != null &&
-                adapter.getItem(position).equals(adapter.getItem(position + 8)) &&
-                adapter.getItem(position).equals(adapter.getItem(position + 16));
     }
 }
