@@ -317,7 +317,7 @@ public class GameAdapter extends BaseAdapter {
             imageView = new ImageView(context);
             imageView.setLayoutParams(new GridView.LayoutParams(cellSize, cellSize));
             imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-            imageView.setPadding(2, 2, 2, 2);
+            imageView.setPadding(8, 8, 8, 8);
         } else {
             imageView = (ImageView) convertView;
         }
