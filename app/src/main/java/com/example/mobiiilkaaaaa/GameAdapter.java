@@ -30,7 +30,13 @@ public class GameAdapter extends BaseAdapter {
         this.gridSize = gridSize;
         this.gems = new Integer[gridSize * gridSize];
         this.random = new Random();
+        Log.d("GameAdapter", "Constructor called with gridSize: " + gridSize + ", total elements: " + (gridSize * gridSize));
         initializeBoard();
+        
+        // Log the first few elements after initialization
+        for (int i = 0; i < Math.min(10, gems.length); i++) {
+            Log.d("GameAdapter", "After init - gem at " + i + ": " + gems[i]);
+        }
     }
 
     private void initializeBoard() {
@@ -183,14 +189,21 @@ public class GameAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         ImageView imageView;
         
+        // Log position details
+        int row = position / gridSize;
+        int col = position % gridSize;
+        Log.d("GameAdapter", "getView called for position: " + position + " (row: " + row + ", col: " + col + ")");
+        
         if (convertView == null) {
             imageView = new ImageView(context);
             int cellSize = Math.max(parent.getWidth() / gridSize, 1); 
             imageView.setLayoutParams(new ViewGroup.LayoutParams(cellSize, cellSize));
             imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
             imageView.setPadding(4, 4, 4, 4);
+            Log.d("GameAdapter", "Created new ImageView for position: " + position);
         } else {
             imageView = (ImageView) convertView;
+            Log.d("GameAdapter", "Reusing ImageView for position: " + position);
         }
 
         // Ensure the position is valid
@@ -204,10 +217,10 @@ public class GameAdapter extends BaseAdapter {
             if (gems[position] != null) {
                 imageView.setImageResource(gems[position]);
                 imageView.setVisibility(View.VISIBLE);
-                Log.d("GameAdapter", "Displaying gem at " + position + ": " + gems[position]);
+                Log.d("GameAdapter", "Displaying gem at " + position + " (row: " + row + ", col: " + col + "): " + gems[position]);
             } else {
                 imageView.setVisibility(View.INVISIBLE);
-                Log.d("GameAdapter", "No gem to display at " + position);
+                Log.d("GameAdapter", "No gem to display at " + position + " (row: " + row + ", col: " + col + ")");
             }
         } else {
             Log.e("GameAdapter", "Invalid position: " + position);

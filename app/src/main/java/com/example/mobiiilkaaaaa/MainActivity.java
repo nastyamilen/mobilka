@@ -2,6 +2,7 @@ package com.example.mobiiilkaaaaa;
 
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.widget.GridView;
 import android.widget.TextView;
@@ -29,10 +30,13 @@ public class MainActivity extends AppCompatActivity {
         scoreTextView = findViewById(R.id.scoreTextView);
         updateScore(0);
 
+        Log.d("MainActivity", "Creating GameAdapter with grid size: " + GRID_SIZE);
         gameAdapter = new GameAdapter(this, GRID_SIZE);
         gridView.setAdapter(gameAdapter);
+        Log.d("MainActivity", "GridView adapter set");
 
         gridView.setOnItemClickListener((parent, view, position, id) -> {
+            Log.d("MainActivity", "Item clicked at position: " + position);
             if (isAnimating) {
                 return;
             }
