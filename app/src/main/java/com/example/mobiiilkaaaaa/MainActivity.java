@@ -240,18 +240,19 @@ public class MainActivity extends AppCompatActivity {
         scoreTextView.setText("Счет: " + score);
         
         // Проверяем, достигнут ли порог для добавления времени
-        int bonusThreshold = (score / SCORE_FOR_BONUS) * SCORE_FOR_BONUS;
+        int bonusThreshold = score / SCORE_FOR_BONUS;
         if (bonusThreshold > lastBonusThreshold) {
-            // Добавляем бонусное время
-            timeLeftInMillis += TIME_BONUS;
+            // Добавляем бонусное время за каждый пройденный порог
+            int bonusesToAdd = bonusThreshold - lastBonusThreshold;
+            timeLeftInMillis += TIME_BONUS * bonusesToAdd;
             lastBonusThreshold = bonusThreshold;
             
             // Обновляем таймер
             updateTimerText();
             
             // Показываем уведомление о добавлении времени
-            Toast.makeText(this, "Бонус! +30 секунд!", Toast.LENGTH_SHORT).show();
-            Log.d("MainActivity", "Time bonus added: +30 seconds. New time: " + timeLeftInMillis);
+            Toast.makeText(this, "Бонус! +" + (TIME_BONUS / 1000 * bonusesToAdd) + " секунд!", Toast.LENGTH_SHORT).show();
+            Log.d("MainActivity", "Time bonus added: +" + (TIME_BONUS * bonusesToAdd) + " ms. New time: " + timeLeftInMillis);
         }
     }
 
