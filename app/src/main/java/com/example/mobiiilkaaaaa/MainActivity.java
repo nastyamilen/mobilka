@@ -26,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TIMER_KEY = "timer";
     private static final long INITIAL_TIME = 60000; // 1 минута в миллисекундах
     private static final long TIME_BONUS = 30000; // 30 секунд в миллисекундах
-    private static final int SCORE_FOR_BONUS = 2000; // Очки для бонуса времени
+    private static final int SCORE_FOR_BONUS = 500; // Очки для бонуса времени
     
     private GridView gridView;
     private TextView scoreTextView;
@@ -324,16 +324,29 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showResultDialog() {
+        // Получаем текущий рекорд для сравнения
+        DatabaseHelper dbHelper = DatabaseHelper.getInstance(this);
+        int bestScore = dbHelper.getBestScore();
+        boolean isNewRecord = score > bestScore;
+        
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Результат");
-        builder.setMessage("Ваш результат: " + score + " очков");
+        builder.setTitle(isNewRecord ? "Новый рекорд!" : "Результат");
+        
+        String message = "Ваш результат: " + score + " очков";
+        if (isNewRecord) {
+            message += "\nПоздравляем! Это новый рекорд!";
+        } else if (bestScore > 0) {
+            message += "\nТекущий рекорд: " + bestScore + " очков";
+        }
+        
+        builder.setMessage(message);
         builder.setPositiveButton("OK", (dialog, which) -> {
             // Сохраняем результат в базу данных
-            DatabaseHelper dbHelper = DatabaseHelper.getInstance(this);
             dbHelper.addScore(score);
-            Log.d("MainActivity", "Score saved to database: " + score);
+            Log.d("MainActivity", "Score saved to database: " + score + ", is new record: " + isNewRecord);
             finish(); // Закрываем текущую активность и возвращаемся в предыдущую (главное меню)
         });
+        builder.setCancelable(false); // Предотвращаем закрытие диалога нажатием "назад"
         builder.show();
     }
 
@@ -367,10 +380,14 @@ public class MainActivity extends AppCompatActivity {
         }
         
         // Сохраняем результат в базу данных только если игра закончилась естественным путем (таймер истек)
+        // и результат не был уже сохранен через диалоговое окно
         if (score > 0 && timeLeftInMillis <= 0) {
             DatabaseHelper dbHelper = DatabaseHelper.getInstance(this);
+            int bestScore = dbHelper.getBestScore();
+            boolean isNewRecord = score > bestScore;
+            
             dbHelper.addScore(score);
-            Log.d("MainActivity", "Score saved to database on onDestroy: " + score);
+            Log.d("MainActivity", "Score saved to database on onDestroy: " + score + ", is new record: " + isNewRecord);
         }
     }
 }
