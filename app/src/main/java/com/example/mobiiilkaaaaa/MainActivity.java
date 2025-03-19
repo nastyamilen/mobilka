@@ -10,6 +10,9 @@ import android.widget.GridView;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
     private static final int GRID_SIZE = 8;
@@ -125,64 +128,62 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean checkForMatches() {
-        // Check rows
-        for (int row = 0; row < GRID_SIZE; row++) {
-            for (int col = 0; col < GRID_SIZE - 2; col++) {
-                int pos = row * GRID_SIZE + col;
-                if (checkMatch(pos, pos + 1, pos + 2)) {
-                    return true;
-                }
-            }
-        }
-
-        // Check columns
-        for (int col = 0; col < GRID_SIZE; col++) {
-            for (int row = 0; row < GRID_SIZE - 2; row++) {
-                int pos = row * GRID_SIZE + col;
-                if (checkMatch(pos, pos + GRID_SIZE, pos + GRID_SIZE * 2)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    private boolean checkMatch(int pos1, int pos2, int pos3) {
-        Integer gem1 = gameAdapter.getItemId(pos1);
-        Integer gem2 = gameAdapter.getItemId(pos2);
-        Integer gem3 = gameAdapter.getItemId(pos3);
-        return gem1 != null && gem1.equals(gem2) && gem1.equals(gem3);
+        return gameAdapter.isPartOfMatch(0) || 
+               gameAdapter.isPartOfMatch(1) || 
+               gameAdapter.isPartOfMatch(2) || 
+               gameAdapter.isPartOfMatch(3) || 
+               gameAdapter.isPartOfMatch(4) || 
+               gameAdapter.isPartOfMatch(5) || 
+               gameAdapter.isPartOfMatch(6) || 
+               gameAdapter.isPartOfMatch(7) || 
+               gameAdapter.isPartOfMatch(8) || 
+               gameAdapter.isPartOfMatch(9) || 
+               gameAdapter.isPartOfMatch(10) || 
+               gameAdapter.isPartOfMatch(11) || 
+               gameAdapter.isPartOfMatch(12) || 
+               gameAdapter.isPartOfMatch(13) || 
+               gameAdapter.isPartOfMatch(14) || 
+               gameAdapter.isPartOfMatch(15);
     }
 
     private void processMatches() {
         boolean foundMatch = false;
+        Set<Integer> processedPositions = new HashSet<>();
 
-        // Check and remove horizontal matches
-        for (int row = 0; row < GRID_SIZE; row++) {
-            for (int col = 0; col < GRID_SIZE - 2; col++) {
-                int pos = row * GRID_SIZE + col;
-                if (checkMatch(pos, pos + 1, pos + 2)) {
+        // Проверяем все возможные начальные позиции
+        for (int position = 0; position < GRID_SIZE * GRID_SIZE; position++) {
+            if (processedPositions.contains(position)) continue;
+            
+            List<Integer> horizontalMatches = gameAdapter.getHorizontalMatchPositions(position);
+            if (!horizontalMatches.isEmpty()) {
+                processedPositions.addAll(horizontalMatches);
+                
+                // Удаляем все совпадающие элементы
+                for (int pos : horizontalMatches) {
                     gameAdapter.removeGem(pos);
-                    gameAdapter.removeGem(pos + 1);
-                    gameAdapter.removeGem(pos + 2);
-                    foundMatch = true;
-                    updateScore(30);
                 }
+                
+                // Обновляем счет (10 очков за каждый элемент)
+                updateScore(horizontalMatches.size() * 10);
+                foundMatch = true;
+                
+                Log.d("MainActivity", "Horizontal match found with " + horizontalMatches.size() + " gems");
             }
-        }
-
-        // Check and remove vertical matches
-        for (int col = 0; col < GRID_SIZE; col++) {
-            for (int row = 0; row < GRID_SIZE - 2; row++) {
-                int pos = row * GRID_SIZE + col;
-                if (checkMatch(pos, pos + GRID_SIZE, pos + GRID_SIZE * 2)) {
+            
+            List<Integer> verticalMatches = gameAdapter.getVerticalMatchPositions(position);
+            if (!verticalMatches.isEmpty()) {
+                processedPositions.addAll(verticalMatches);
+                
+                // Удаляем все совпадающие элементы
+                for (int pos : verticalMatches) {
                     gameAdapter.removeGem(pos);
-                    gameAdapter.removeGem(pos + GRID_SIZE);
-                    gameAdapter.removeGem(pos + GRID_SIZE * 2);
-                    foundMatch = true;
-                    updateScore(30);
                 }
+                
+                // Обновляем счет (10 очков за каждый элемент)
+                updateScore(verticalMatches.size() * 10);
+                foundMatch = true;
+                
+                Log.d("MainActivity", "Vertical match found with " + verticalMatches.size() + " gems");
             }
         }
 

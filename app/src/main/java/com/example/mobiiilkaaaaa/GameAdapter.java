@@ -10,7 +10,11 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
+import java.util.Set;
+import java.util.HashSet;
 
 public class GameAdapter extends BaseAdapter {
     private Context context;
@@ -105,22 +109,85 @@ public class GameAdapter extends BaseAdapter {
     }
 
     private boolean isHorizontalMatch(int position) {
-        int row = position / gridSize;
-        int col = position % gridSize;
-        
-        if (col > gridSize - 3) return false;
-        
-        return gems[position].equals(gems[position + 1]) &&
-               gems[position].equals(gems[position + 2]);
+        return !getHorizontalMatchPositions(position).isEmpty();
     }
 
     private boolean isVerticalMatch(int position) {
+        return !getVerticalMatchPositions(position).isEmpty();
+    }
+
+    public List<Integer> getHorizontalMatchPositions(int position) {
+        List<Integer> positions = new ArrayList<>();
+        int row = position / gridSize;
+        int col = position % gridSize;
+        
+        if (col > gridSize - 3) return positions;
+        
+        // Проверяем минимальное совпадение (3 в ряд)
+        if (gems[position] == null || 
+            gems[position + 1] == null || 
+            gems[position + 2] == null ||
+            !gems[position].equals(gems[position + 1]) || 
+            !gems[position].equals(gems[position + 2])) {
+            return positions;
+        }
+        
+        // Добавляем первые три позиции
+        positions.add(position);
+        positions.add(position + 1);
+        positions.add(position + 2);
+        
+        // Проверяем дополнительные совпадения (4, 5 и т.д. в ряд)
+        for (int i = 3; col + i < gridSize; i++) {
+            if (gems[position + i] != null && gems[position].equals(gems[position + i])) {
+                positions.add(position + i);
+            } else {
+                break;
+            }
+        }
+        
+        return positions;
+    }
+
+    public List<Integer> getVerticalMatchPositions(int position) {
+        List<Integer> positions = new ArrayList<>();
         int row = position / gridSize;
         
-        if (row > gridSize - 3) return false;
+        if (row > gridSize - 3) return positions;
         
-        return gems[position].equals(gems[position + gridSize]) &&
-               gems[position].equals(gems[position + gridSize * 2]);
+        // Проверяем минимальное совпадение (3 в ряд)
+        if (gems[position] == null || 
+            gems[position + gridSize] == null || 
+            gems[position + gridSize * 2] == null ||
+            !gems[position].equals(gems[position + gridSize]) || 
+            !gems[position].equals(gems[position + gridSize * 2])) {
+            return positions;
+        }
+        
+        // Добавляем первые три позиции
+        positions.add(position);
+        positions.add(position + gridSize);
+        positions.add(position + gridSize * 2);
+        
+        // Проверяем дополнительные совпадения (4, 5 и т.д. в ряд)
+        for (int i = 3; row + i < gridSize; i++) {
+            if (gems[position + gridSize * i] != null && gems[position].equals(gems[position + gridSize * i])) {
+                positions.add(position + gridSize * i);
+            } else {
+                break;
+            }
+        }
+        
+        return positions;
+    }
+
+    public List<Integer> getAllMatchPositions(int position) {
+        Set<Integer> positions = new HashSet<>();
+        
+        positions.addAll(getHorizontalMatchPositions(position));
+        positions.addAll(getVerticalMatchPositions(position));
+        
+        return new ArrayList<>(positions);
     }
 
     public void swapItems(int pos1, int pos2) {
