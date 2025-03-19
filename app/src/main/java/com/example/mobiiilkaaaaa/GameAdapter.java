@@ -1,6 +1,7 @@
 package com.example.mobiiilkaaaaa;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -36,6 +37,7 @@ public class GameAdapter extends BaseAdapter {
         // Fill board with random gems
         for (int i = 0; i < gems.length; i++) {
             gems[i] = getRandomGem();
+            Log.d("GameAdapter", "Initialized gem at " + i + ": " + gems[i]);
         }
         
         // Keep initializing until there are no matches
@@ -43,6 +45,7 @@ public class GameAdapter extends BaseAdapter {
             for (int i = 0; i < gems.length; i++) {
                 if (isPartOfMatch(i)) {
                     gems[i] = getRandomGem();
+                    Log.d("GameAdapter", "Reinitialized gem at " + i + ": " + gems[i]);
                 }
             }
         }
@@ -168,8 +171,10 @@ public class GameAdapter extends BaseAdapter {
         if (gems[position] != null) {
             imageView.setImageResource(gems[position]);
             imageView.setVisibility(View.VISIBLE);
+            Log.d("GameAdapter", "Displaying gem at " + position + ": " + gems[position]);
         } else {
             imageView.setVisibility(View.INVISIBLE);
+            Log.d("GameAdapter", "No gem to display at " + position);
         }
 
         return imageView;
