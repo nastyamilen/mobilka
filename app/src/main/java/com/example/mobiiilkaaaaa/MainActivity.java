@@ -242,17 +242,23 @@ public class MainActivity extends AppCompatActivity {
         // Проверяем, достигнут ли порог для добавления времени
         int bonusThreshold = score / SCORE_FOR_BONUS;
         if (bonusThreshold > lastBonusThreshold) {
-            // Добавляем бонусное время за каждый пройденный порог
             int bonusesToAdd = bonusThreshold - lastBonusThreshold;
-            timeLeftInMillis += TIME_BONUS * bonusesToAdd;
+            long bonusTime = TIME_BONUS * bonusesToAdd;
+            
+            // Обновляем оставшееся время
+            timeLeftInMillis += bonusTime;
             lastBonusThreshold = bonusThreshold;
             
-            // Обновляем таймер
-            updateTimerText();
+            // Если таймер активен - перезапускаем с новым временем
+            if (timerRunning) {
+                gameTimer.cancel();
+                startTimer();
+            }
             
-            // Показываем уведомление о добавлении времени
-            Toast.makeText(this, "Бонус! +" + (TIME_BONUS / 1000 * bonusesToAdd) + " секунд!", Toast.LENGTH_SHORT).show();
-            Log.d("MainActivity", "Time bonus added: +" + (TIME_BONUS * bonusesToAdd) + " ms. New time: " + timeLeftInMillis);
+            // Обновляем отображение
+            updateTimerText();
+            Toast.makeText(this, "Бонус! +" + (bonusTime/1000) + " секунд!", Toast.LENGTH_SHORT).show();
+            Log.d("MainActivity", "Time bonus added: " + bonusTime + "ms. Total time: " + timeLeftInMillis);
         }
     }
 
@@ -304,16 +310,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFinish() {
                 timerRunning = false;
-                Log.d("MainActivity", "Timer finished");
-                // Показываем диалоговое окно с результатом
                 showResultDialog();
             }
         }.start();
+        
         timerRunning = true;
     }
 
     private void pauseTimer() {
-        gameTimer.cancel();
+        if (gameTimer != null) {
+            gameTimer.cancel();
+        }
         timerRunning = false;
     }
 
