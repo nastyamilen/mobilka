@@ -40,6 +40,12 @@ public class GameAdapter extends BaseAdapter {
             Log.d("GameAdapter", "Initialized gem at " + i + ": " + gems[i]);
         }
         
+        // Ensure first element is initialized
+        if (gems[0] == null) {
+            gems[0] = getRandomGem();
+            Log.d("GameAdapter", "Force initialized first gem: " + gems[0]);
+        }
+        
         // Keep initializing until there are no matches
         while (hasInitialMatches()) {
             for (int i = 0; i < gems.length; i++) {
@@ -47,6 +53,12 @@ public class GameAdapter extends BaseAdapter {
                     gems[i] = getRandomGem();
                     Log.d("GameAdapter", "Reinitialized gem at " + i + ": " + gems[i]);
                 }
+            }
+            
+            // Ensure first element is not null after reinitialization
+            if (gems[0] == null) {
+                gems[0] = getRandomGem();
+                Log.d("GameAdapter", "Force reinitialized first gem: " + gems[0]);
             }
         }
     }
@@ -110,7 +122,13 @@ public class GameAdapter extends BaseAdapter {
     }
 
     public void removeGem(int position) {
-        gems[position] = null;
+        // Special case for first gem - replace it with a new gem instead of setting to null
+        if (position == 0) {
+            gems[position] = getRandomGem();
+            Log.d("GameAdapter", "First gem replaced instead of removed: " + gems[position]);
+        } else {
+            gems[position] = null;
+        }
         notifyDataSetChanged();
     }
 
@@ -136,6 +154,13 @@ public class GameAdapter extends BaseAdapter {
                 gems[row * gridSize + col] = getRandomGem();
             }
         }
+        
+        // Ensure first element is always initialized
+        if (gems[0] == null) {
+            gems[0] = getRandomGem();
+            Log.d("GameAdapter", "Ensuring first gem is initialized after drop: " + gems[0]);
+        }
+        
         notifyDataSetChanged();
     }
 
@@ -168,13 +193,25 @@ public class GameAdapter extends BaseAdapter {
             imageView = (ImageView) convertView;
         }
 
-        if (gems[position] != null) {
-            imageView.setImageResource(gems[position]);
-            imageView.setVisibility(View.VISIBLE);
-            Log.d("GameAdapter", "Displaying gem at " + position + ": " + gems[position]);
+        // Ensure the position is valid
+        if (position >= 0 && position < gems.length) {
+            // Force first element to be visible if it's null
+            if (position == 0 && gems[position] == null) {
+                gems[position] = getRandomGem();
+                Log.d("GameAdapter", "Fixed null gem at position 0: " + gems[position]);
+            }
+
+            if (gems[position] != null) {
+                imageView.setImageResource(gems[position]);
+                imageView.setVisibility(View.VISIBLE);
+                Log.d("GameAdapter", "Displaying gem at " + position + ": " + gems[position]);
+            } else {
+                imageView.setVisibility(View.INVISIBLE);
+                Log.d("GameAdapter", "No gem to display at " + position);
+            }
         } else {
+            Log.e("GameAdapter", "Invalid position: " + position);
             imageView.setVisibility(View.INVISIBLE);
-            Log.d("GameAdapter", "No gem to display at " + position);
         }
 
         return imageView;
