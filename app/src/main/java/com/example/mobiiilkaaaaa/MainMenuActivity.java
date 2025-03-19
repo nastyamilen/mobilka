@@ -5,19 +5,26 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainMenuActivity extends AppCompatActivity {
     private static final String PREFS_NAME = "GamePrefs";
     private static final String GAME_STARTED_KEY = "gameStarted";
+    private TextView bestScoreTextView;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_menu);
 
+        bestScoreTextView = findViewById(R.id.bestScoreTextView);
         Button startButton = findViewById(R.id.startButton);
         Button continueButton = findViewById(R.id.continueButton);
+        Button showScoresButton = findViewById(R.id.showScoresButton);
+        
+        // Загружаем и отображаем лучший результат
+        updateBestScore();
         
         // Проверяем, была ли начата игра ранее
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
@@ -49,11 +56,22 @@ public class MainMenuActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+        
+        showScoresButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainMenuActivity.this, ScoresActivity.class);
+                startActivity(intent);
+            }
+        });
     }
     
     @Override
     protected void onResume() {
         super.onResume();
+        
+        // Обновляем лучший результат при возвращении в меню
+        updateBestScore();
         
         // Проверяем, была ли начата игра
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
@@ -66,5 +84,11 @@ public class MainMenuActivity extends AppCompatActivity {
         } else {
             continueButton.setVisibility(View.GONE);
         }
+    }
+    
+    private void updateBestScore() {
+        DatabaseHelper dbHelper = DatabaseHelper.getInstance(this);
+        int bestScore = dbHelper.getBestScore();
+        bestScoreTextView.setText("Лучший результат: " + bestScore);
     }
 }

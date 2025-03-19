@@ -239,4 +239,22 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        // Сохраняем состояние игры
+        saveGameState();
+    }
+    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Сохраняем результат в базу данных
+        if (score > 0) {
+            DatabaseHelper dbHelper = DatabaseHelper.getInstance(this);
+            dbHelper.addScore(score);
+            Log.d("MainActivity", "Score saved to database: " + score);
+        }
+    }
 }
