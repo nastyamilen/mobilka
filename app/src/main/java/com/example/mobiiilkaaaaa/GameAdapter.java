@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.BaseAdapter;
+import android.widget.GridView;
 import android.widget.ImageView;
 
 import java.util.Random;
@@ -191,34 +192,25 @@ public class GameAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         ImageView imageView;
         
-        // Log position details
         int row = position / gridSize;
         int col = position % gridSize;
-        Log.d("GameAdapter", "getView called for position: " + position + " (row: " + row + ", col: " + col + ")");
         
         if (convertView == null) {
             imageView = new ImageView(context);
-            imageView.setLayoutParams(new ViewGroup.LayoutParams(cellSize, cellSize));
+            imageView.setLayoutParams(new GridView.LayoutParams(cellSize, cellSize));
             imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-            imageView.setPadding(4, 4, 4, 4);
-            Log.d("GameAdapter", "Created new ImageView for position: " + position);
+            imageView.setPadding(2, 2, 2, 2);
         } else {
             imageView = (ImageView) convertView;
-            Log.d("GameAdapter", "Reusing ImageView for position: " + position);
         }
-
-        // Ensure the position is valid
+        
+        Log.d("GameAdapter", "Getting view for position " + position + " (row: " + row + ", col: " + col + ")");
+        
         if (position >= 0 && position < gems.length) {
-            // Force first element to be visible if it's null
-            if (position == 0 && gems[position] == null) {
-                gems[position] = getRandomGem();
-                Log.d("GameAdapter", "Fixed null gem at position 0: " + gems[position]);
-            }
-
             if (gems[position] != null) {
                 imageView.setImageResource(gems[position]);
                 imageView.setVisibility(View.VISIBLE);
-                Log.d("GameAdapter", "Displaying gem at " + position + " (row: " + row + ", col: " + col + "): " + gems[position]);
+                Log.d("GameAdapter", "Displaying gem at " + position + " (row: " + row + ", col: " + col + ")");
             } else {
                 imageView.setVisibility(View.INVISIBLE);
                 Log.d("GameAdapter", "No gem to display at " + position + " (row: " + row + ", col: " + col + ")");

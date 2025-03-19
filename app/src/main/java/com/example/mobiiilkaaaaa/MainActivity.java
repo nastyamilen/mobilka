@@ -37,7 +37,10 @@ public class MainActivity extends AppCompatActivity {
         
         // Устанавливаем размеры ячеек GridView
         int screenWidth = getResources().getDisplayMetrics().widthPixels;
-        int cellSize = (screenWidth - 64) / GRID_SIZE; // 64 = padding (16*2) + spacing
+        int availableWidth = screenWidth - 48; // 48 = padding (16*2) + border padding (8*2)
+        int cellSize = availableWidth / GRID_SIZE;
+        
+        Log.d("MainActivity", "Screen width: " + screenWidth + ", Cell size: " + cellSize);
         
         // Проверяем, нужно ли продолжить предыдущую игру
         Bundle extras = getIntent().getExtras();

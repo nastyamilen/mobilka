@@ -18,22 +18,23 @@
     <!-- Игровое поле -->
     <FrameLayout
         android:id="@+id/gameFrameLayout"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@id/scoreTextView"
-        android:layout_centerInParent="true"
+        android:layout_centerHorizontal="true"
         android:background="@drawable/border">
 
         <GridView
             android:id="@+id/gridView"
-            android:layout_width="320dp"
-            android:layout_height="320dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:numColumns="8"
-            android:horizontalSpacing="4dp"
-            android:verticalSpacing="4dp"
+            android:horizontalSpacing="2dp"
+            android:verticalSpacing="2dp"
             android:gravity="center"
+            android:stretchMode="columnWidth"
             android:layout_gravity="center"
-            android:padding="8dp" />
+            android:padding="4dp" />
     </FrameLayout>
     
     <!-- Кнопка возврата в главное меню -->
