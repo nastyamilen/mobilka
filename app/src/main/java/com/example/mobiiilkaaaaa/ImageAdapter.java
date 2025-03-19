@@ -69,34 +69,38 @@ public class ImageAdapter extends BaseAdapter {
         View view2 = getViewByPosition(position2);
 
         if (view1 != null && view2 != null) {
+            float x1 = view1.getX();
+            float x2 = view2.getX();
+            float y1 = view1.getY();
+            float y2 = view2.getY();
+
             // Анимация обмена
-            ObjectAnimator animator1 = ObjectAnimator.ofFloat(view1, "translationX", view2.getX() - view1.getX());
-            ObjectAnimator animator2 = ObjectAnimator.ofFloat(view2, "translationX", view1.getX() - view2.getX());
+            ObjectAnimator animatorX1 = ObjectAnimator.ofFloat(view1, "x", x1, x2);
+            ObjectAnimator animatorY1 = ObjectAnimator.ofFloat(view1, "y", y1, y2);
+            ObjectAnimator animatorX2 = ObjectAnimator.ofFloat(view2, "x", x2, x1);
+            ObjectAnimator animatorY2 = ObjectAnimator.ofFloat(view2, "y", y2, y1);
 
-            animator1.setDuration(300);
-            animator2.setDuration(300);
+            animatorX1.setDuration(300);
+            animatorY1.setDuration(300);
+            animatorX2.setDuration(300);
+            animatorY2.setDuration(300);
 
-            animator1.start();
-            animator2.start();
+            animatorX1.start();
+            animatorY1.start();
+            animatorX2.start();
+            animatorY2.start();
 
-            animator1.addUpdateListener(animation -> {
-                view1.invalidate();
-                view2.invalidate();
-            });
-
-            animator1.addListener(new android.animation.AnimatorListenerAdapter() {
+            animatorX1.addListener(new android.animation.AnimatorListenerAdapter() {
                 @Override
                 public void onAnimationEnd(android.animation.Animator animation) {
                     // После завершения анимации меняем элементы местами
                     swapItems(position1, position2);
-
-                    // Проверяем, есть ли совпадения после обмена
-                    if (checkMatches()) {
-                        removeMatches(onComplete);
-                    } else {
-                        // Если совпадений нет, возвращаем элементы на место
-                        swapItemsWithAnimation(position1, position2, onComplete);
-                    }
+                    view1.setX(x1);
+                    view1.setY(y1);
+                    view2.setX(x2);
+                    view2.setY(y2);
+                    notifyDataSetChanged();
+                    onComplete.run();
                 }
             });
         }
@@ -164,28 +168,28 @@ public class ImageAdapter extends BaseAdapter {
     // Метод для удаления элементов с анимацией
     public void removeItemsWithAnimation(int[] positions, Runnable onComplete) {
         Set<View> viewsToAnimate = new HashSet<>();
+        int animationsCompleted = 0;
+        final int totalAnimations = positions.length;
 
         for (int position : positions) {
             View view = getViewByPosition(position);
             if (view != null) {
                 viewsToAnimate.add(view);
+                ObjectAnimator animator = ObjectAnimator.ofFloat(view, "alpha", 1f, 0f);
+                animator.setDuration(300);
+                animator.start();
+
+                animator.addListener(new android.animation.AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(android.animation.Animator animation) {
+                        animationsCompleted++;
+                        if (animationsCompleted == totalAnimations) {
+                            removeItems(positions);
+                            onComplete.run();
+                        }
+                    }
+                });
             }
-        }
-
-        // Анимация исчезновения
-        for (View view : viewsToAnimate) {
-            ObjectAnimator animator = ObjectAnimator.ofFloat(view, "alpha", 1f, 0f);
-            animator.setDuration(300);
-            animator.start();
-
-            animator.addListener(new android.animation.AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(android.animation.Animator animation) {
-                    // После завершения анимации удаляем элементы
-                    removeItems(positions);
-                    onComplete.run();
-                }
-            });
         }
     }
 
@@ -221,6 +225,7 @@ public class ImageAdapter extends BaseAdapter {
             });
         }
     }
+
     private void animateAppear(int position) {
         View view = getViewByPosition(position);
 
@@ -235,39 +240,42 @@ public class ImageAdapter extends BaseAdapter {
 
     // Метод для заполнения пустот
     public void fillEmptySpaces(Runnable onComplete) {
-        for (int col = 0; col < 8; col++) {
-            int emptyRow = 7; // Начинаем с нижней строки
-
-            // Проходим столбец снизу вверх
-            for (int row = 7; row >= 0; row--) {
-                int position = row * 8 + col;
-
-                // Если текущий элемент не пустой
-                if (gemImages[position] != null) {
-                    // Если есть пустое место ниже, перемещаем элемент
-                    if (row != emptyRow) {
-                        gemImages[emptyRow * 8 + col] = gemImages[position];
-                        gemImages[position] = null;
-
-                        // Анимация падения
-                        animateFall(position, emptyRow * 8 + col);
+        boolean needsRefill;
+        do {
+            needsRefill = false;
+            // Падение существующих элементов
+            for (int col = 0; col < 8; col++) {
+                for (int row = 7; row > 0; row--) {
+                    int currentPos = row * 8 + col;
+                    if (gemImages[currentPos] == null) {
+                        // Ищем ближайший непустой элемент сверху
+                        for (int aboveRow = row - 1; aboveRow >= 0; aboveRow--) {
+                            int abovePos = aboveRow * 8 + col;
+                            if (gemImages[abovePos] != null) {
+                                // Перемещаем элемент вниз
+                                gemImages[currentPos] = gemImages[abovePos];
+                                gemImages[abovePos] = null;
+                                animateFall(abovePos, currentPos);
+                                needsRefill = true;
+                                break;
+                            }
+                        }
                     }
-                    emptyRow--;
                 }
             }
 
-            // Заполняем оставшиеся пустоты новыми элементами
-            for (int row = emptyRow; row >= 0; row--) {
-                int position = row * 8 + col;
-                gemImages[position] = getRandomGemWithoutMatches(position);
-
-                // Анимация появления нового элемента
-                animateAppear(position);
+            // Заполнение пустых ячеек новыми элементами
+            for (int i = 0; i < gemImages.length; i++) {
+                if (gemImages[i] == null) {
+                    gemImages[i] = getRandomGemWithoutMatches(i);
+                    animateAppear(i);
+                    needsRefill = true;
+                }
             }
-        }
+        } while (needsRefill);
 
-        notifyDataSetChanged(); // Обновляем GridView
-        onComplete.run(); // Вызываем обратный вызов после завершения
+        notifyDataSetChanged();
+        onComplete.run();
     }
 
     // Метод для получения View по позиции

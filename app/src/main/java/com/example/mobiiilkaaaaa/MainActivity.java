@@ -63,16 +63,29 @@ public class MainActivity extends AppCompatActivity {
 
     // Проверка, допустим ли обмен
     private boolean isSwapValid(int position1, int position2) {
+        // Проверяем, что позиции соседние (по горизонтали или вертикали)
+        int row1 = position1 / 8;
+        int col1 = position1 % 8;
+        int row2 = position2 / 8;
+        int col2 = position2 % 8;
+        
+        boolean isAdjacent = (Math.abs(row1 - row2) == 1 && col1 == col2) || 
+                            (Math.abs(col1 - col2) == 1 && row1 == row2);
+        
+        if (!isAdjacent) {
+            return false;
+        }
+
         // Временно меняем элементы местами
         adapter.swapItems(position1, position2);
 
         // Проверяем, есть ли совпадения после обмена
-        boolean isValid = checkMatches();
+        boolean hasMatches = checkMatches();
 
         // Возвращаем элементы на место
         adapter.swapItems(position1, position2);
 
-        return isValid;
+        return hasMatches;
     }
 
     // Метод для проверки совпадений
