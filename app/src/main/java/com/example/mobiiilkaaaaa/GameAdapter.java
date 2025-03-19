@@ -157,7 +157,7 @@ public class GameAdapter extends BaseAdapter {
         
         if (convertView == null) {
             imageView = new ImageView(context);
-            int cellSize = parent.getWidth() / gridSize;
+            int cellSize = Math.max(parent.getWidth() / gridSize, 1); 
             imageView.setLayoutParams(new ViewGroup.LayoutParams(cellSize, cellSize));
             imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
             imageView.setPadding(4, 4, 4, 4);

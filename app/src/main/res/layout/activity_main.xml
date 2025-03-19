@@ -16,14 +16,21 @@
         android:layout_marginBottom="16dp"/>
 
     <!-- Игровое поле -->
-    <GridView
-        android:id="@+id/gridView"
+    <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:numColumns="8"
-        android:horizontalSpacing="4dp"
-        android:verticalSpacing="4dp"
-        android:gravity="center"
         android:layout_below="@id/scoreTextView"
-        android:layout_centerHorizontal="true"/>
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/border">
+
+        <GridView
+            android:id="@+id/gridView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:numColumns="8"
+            android:horizontalSpacing="4dp"
+            android:verticalSpacing="4dp"
+            android:gravity="center"
+            android:layout_centerInParent="true"/>
+    </FrameLayout>
 </RelativeLayout>
