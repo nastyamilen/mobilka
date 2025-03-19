@@ -25,6 +25,8 @@ public class GameAdapter extends BaseAdapter {
         R.drawable.gem_purple
     };
 
+    private int cellSize = 40; // Размер ячейки по умолчанию
+    
     public GameAdapter(Context context, int gridSize) {
         this.context = context;
         this.gridSize = gridSize;
@@ -196,7 +198,6 @@ public class GameAdapter extends BaseAdapter {
         
         if (convertView == null) {
             imageView = new ImageView(context);
-            int cellSize = Math.max(parent.getWidth() / gridSize, 1); 
             imageView.setLayoutParams(new ViewGroup.LayoutParams(cellSize, cellSize));
             imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
             imageView.setPadding(4, 4, 4, 4);
@@ -228,6 +229,11 @@ public class GameAdapter extends BaseAdapter {
         }
 
         return imageView;
+    }
+
+    public void setCellSize(int size) {
+        this.cellSize = size;
+        Log.d("GameAdapter", "Cell size set to: " + size);
     }
 
     // Методы для сохранения и загрузки состояния игры

@@ -35,11 +35,19 @@ public class MainActivity extends AppCompatActivity {
         gridView = findViewById(R.id.gridView);
         scoreTextView = findViewById(R.id.scoreTextView);
         
+        // Устанавливаем размеры ячеек GridView
+        int screenWidth = getResources().getDisplayMetrics().widthPixels;
+        int cellSize = (screenWidth - 64) / GRID_SIZE; // 64 = padding (16*2) + spacing
+        
         // Проверяем, нужно ли продолжить предыдущую игру
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
             continueGame = extras.getBoolean("continueGame", false);
         }
+        
+        Log.d("MainActivity", "Creating GameAdapter with grid size: " + GRID_SIZE);
+        gameAdapter = new GameAdapter(this, GRID_SIZE);
+        gameAdapter.setCellSize(cellSize);
         
         if (continueGame) {
             // Загружаем сохраненное состояние игры
@@ -47,8 +55,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             // Начинаем новую игру
             updateScore(0);
-            Log.d("MainActivity", "Creating GameAdapter with grid size: " + GRID_SIZE);
-            gameAdapter = new GameAdapter(this, GRID_SIZE);
             gridView.setAdapter(gameAdapter);
             Log.d("MainActivity", "GridView adapter set");
         }
@@ -212,9 +218,6 @@ public class MainActivity extends AppCompatActivity {
         score = prefs.getInt(SCORE_KEY, 0);
         updateScore(0);
         
-        Log.d("MainActivity", "Creating GameAdapter with grid size: " + GRID_SIZE);
-        gameAdapter = new GameAdapter(this, GRID_SIZE);
-        
         // Загружаем состояние камней
         String gameState = prefs.getString(GAME_STATE_KEY, "");
         if (!gameState.isEmpty()) {
@@ -224,5 +227,13 @@ public class MainActivity extends AppCompatActivity {
         
         gridView.setAdapter(gameAdapter);
         Log.d("MainActivity", "GridView adapter set");
+        
+        // Принудительно обновляем GridView
+        gridView.post(new Runnable() {
+            @Override
+            public void run() {
+                gameAdapter.notifyDataSetChanged();
+            }
+        });
     }
 }
