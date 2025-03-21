@@ -20,13 +20,14 @@ import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
     private static final String PREFS_NAME = "MatchThreePrefs";
-    private static final int GRID_SIZE = 8;
     private static final String GAME_STATE_KEY = "gameState";
     private static final String SCORE_KEY = "score";
     private static final String TIMER_KEY = "timer";
-    private static final long INITIAL_TIME = 60000; // 1 минута в миллисекундах
     private static final long TIME_BONUS = 30000; // 30 секунд в миллисекундах
     private static final int SCORE_FOR_BONUS = 500; // Очки для бонуса времени
+    
+    private int GRID_SIZE; // Будет установлено из настроек
+    private long INITIAL_TIME; // Будет установлено из настроек
     
     private GridView gridView;
     private TextView scoreTextView;
@@ -40,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
     
     // Переменные для таймера
     private CountDownTimer gameTimer;
-    private long timeLeftInMillis = INITIAL_TIME;
+    private long timeLeftInMillis;
     private boolean timerRunning = false;
     private int lastBonusThreshold = 0; // Последний порог для бонуса времени
 
@@ -49,6 +50,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Загружаем настройки
+        GRID_SIZE = SettingsFragment.getGridSize(this);
+        INITIAL_TIME = SettingsFragment.getInitialTime(this);
+        
         gridView = findViewById(R.id.gridView);
         scoreTextView = findViewById(R.id.scoreTextView);
         timerTextView = findViewById(R.id.timerTextView);

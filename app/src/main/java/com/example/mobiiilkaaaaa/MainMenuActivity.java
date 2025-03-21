@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.FragmentTransaction;
 
 public class MainMenuActivity extends AppCompatActivity {
     private static final String PREFS_NAME = "GamePrefs";
@@ -22,6 +23,8 @@ public class MainMenuActivity extends AppCompatActivity {
         Button startButton = findViewById(R.id.startButton);
         Button continueButton = findViewById(R.id.continueButton);
         Button showScoresButton = findViewById(R.id.showScoresButton);
+        Button settingsButton = findViewById(R.id.settingsButton);
+        Button helpButton = findViewById(R.id.helpButton);
         
         // Загружаем и отображаем лучший результат
         updateBestScore();
@@ -62,6 +65,30 @@ public class MainMenuActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(MainMenuActivity.this, ScoresActivity.class);
                 startActivity(intent);
+            }
+        });
+        
+        settingsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Открываем фрагмент настроек
+                SettingsFragment settingsFragment = new SettingsFragment();
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.fragmentContainer, settingsFragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
+            }
+        });
+        
+        helpButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Открываем фрагмент помощи
+                HelpFragment helpFragment = new HelpFragment();
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.fragmentContainer, helpFragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
             }
         });
     }

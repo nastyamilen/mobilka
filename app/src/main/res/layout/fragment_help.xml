@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/helpTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Как играть"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="24dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Основные правила"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Match-3 - это игра, в которой вам нужно составлять линии из 3 или более одинаковых камней. Чем больше камней в линии, тем больше очков вы получаете."
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Как играть:"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="1. Нажмите на камень, который хотите переместить.\n\n2. Затем нажмите на соседний камень, с которым хотите его поменять местами.\n\n3. Если после обмена образуется линия из 3 или более одинаковых камней, они исчезнут, и вы получите очки.\n\n4. Если линия не образуется, камни вернутся на свои места."
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Очки и время"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="• За каждый исчезнувший камень вы получаете 10 очков.\n\n• У вас есть ограниченное время на игру.\n\n• Каждые 500 очков вы получаете дополнительные 30 секунд.\n\n• Игра заканчивается, когда истекает время."
+            android:textSize="16sp"
+            android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Советы"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="• Старайтесь создавать линии из 4 или 5 камней для получения большего количества очков.\n\n• Обращайте внимание на возможные комбинации после исчезновения камней.\n\n• Планируйте ходы заранее, чтобы создавать цепочки комбинаций."
+            android:textSize="16sp"
+            android:layout_marginBottom="24dp"/>
+
+        <Button
+            android:id="@+id/backToMenuFromHelpButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Вернуться в меню"/>
+
+    </LinearLayout>
+</ScrollView>
