@@ -45,6 +45,7 @@ public class SettingsFragment extends Fragment {
     private Switch musicSwitch;
     private Button saveSettingsButton;
     private Button resetSettingsButton;
+    private Button backToMenuButton;
     
     private SharedPreferences settings;
     
@@ -63,6 +64,7 @@ public class SettingsFragment extends Fragment {
         musicSwitch = view.findViewById(R.id.musicSwitch);
         saveSettingsButton = view.findViewById(R.id.saveSettingsButton);
         resetSettingsButton = view.findViewById(R.id.resetSettingsButton);
+        backToMenuButton = view.findViewById(R.id.backToMenuFromSettingsButton);
         
         // Загрузка текущих настроек
         loadSettings();
@@ -70,6 +72,12 @@ public class SettingsFragment extends Fragment {
         // Настройка обработчиков событий
         saveSettingsButton.setOnClickListener(v -> saveSettings());
         resetSettingsButton.setOnClickListener(v -> resetSettings());
+        backToMenuButton.setOnClickListener(v -> {
+            // Возвращаемся в главное меню
+            if (getActivity() != null) {
+                getActivity().getSupportFragmentManager().popBackStack();
+            }
+        });
         
         return view;
     }

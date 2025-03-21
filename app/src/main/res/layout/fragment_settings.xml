@@ -132,7 +132,14 @@
             android:id="@+id/resetSettingsButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Сбросить настройки"/>
+            android:text="Сбросить настройки"
+            android:layout_marginBottom="16dp"/>
+
+        <Button
+            android:id="@+id/backToMenuFromSettingsButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Вернуться в меню"/>
 
     </LinearLayout>
 </ScrollView>

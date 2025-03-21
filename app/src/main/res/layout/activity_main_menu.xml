@@ -7,70 +7,75 @@
     <FrameLayout
         android:id="@+id/fragmentContainer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone" />
-
-    <TextView
-        android:id="@+id/titleTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Match-3 Game"
-        android:textSize="32sp"
-        android:textStyle="bold"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="50dp"
-        android:layout_marginBottom="30dp"/>
-        
-    <TextView
-        android:id="@+id/bestScoreTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Лучший результат: 0"
-        android:textSize="20sp"
-        android:layout_below="@id/titleTextView"
-        android:layout_centerHorizontal="true"
-        android:layout_marginBottom="30dp"/>
+        android:layout_height="match_parent" />
 
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_centerInParent="true"
-        android:gravity="center">
+        android:id="@+id/mainMenuContent"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <Button
-            android:id="@+id/startButton"
-            android:layout_width="200dp"
+        <TextView
+            android:id="@+id/titleTextView"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Начать игру"
-            android:layout_marginBottom="16dp" />
+            android:text="Match-3 Game"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="50dp"
+            android:layout_marginBottom="30dp"/>
+            
+        <TextView
+            android:id="@+id/bestScoreTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Лучший результат: 0"
+            android:textSize="20sp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="30dp"/>
 
-        <Button
-            android:id="@+id/continueButton"
-            android:layout_width="200dp"
+        <LinearLayout
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Продолжить игру"
-            android:layout_marginBottom="16dp" />
-            
-        <Button
-            android:id="@+id/showScoresButton"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:text="Таблица рекордов"
-            android:layout_marginBottom="16dp" />
-            
-        <Button
-            android:id="@+id/settingsButton"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:text="Настройки"
-            android:layout_marginBottom="16dp" />
-            
-        <Button
-            android:id="@+id/helpButton"
-            android:layout_width="200dp"
-            android:layout_height="wrap_content"
-            android:text="Как играть" />
+            android:orientation="vertical"
+            android:layout_gravity="center"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/startButton"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:text="Начать игру"
+                android:layout_marginBottom="16dp" />
+
+            <Button
+                android:id="@+id/continueButton"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:text="Продолжить игру"
+                android:layout_marginBottom="16dp" />
+                
+            <Button
+                android:id="@+id/showScoresButton"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:text="Таблица рекордов"
+                android:layout_marginBottom="16dp" />
+                
+            <Button
+                android:id="@+id/settingsButton"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:text="Настройки"
+                android:layout_marginBottom="16dp" />
+                
+            <Button
+                android:id="@+id/helpButton"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:text="Как играть" />
+        </LinearLayout>
     </LinearLayout>
 
 </RelativeLayout>

@@ -13,6 +13,7 @@ public class MainMenuActivity extends AppCompatActivity {
     private static final String PREFS_NAME = "GamePrefs";
     private static final String GAME_STARTED_KEY = "gameStarted";
     private TextView bestScoreTextView;
+    private View mainMenuContent;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,6 +21,8 @@ public class MainMenuActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main_menu);
 
         bestScoreTextView = findViewById(R.id.bestScoreTextView);
+        mainMenuContent = findViewById(R.id.mainMenuContent);
+        
         Button startButton = findViewById(R.id.startButton);
         Button continueButton = findViewById(R.id.continueButton);
         Button showScoresButton = findViewById(R.id.showScoresButton);
@@ -77,6 +80,9 @@ public class MainMenuActivity extends AppCompatActivity {
                 transaction.replace(R.id.fragmentContainer, settingsFragment);
                 transaction.addToBackStack(null);
                 transaction.commit();
+                
+                // Скрываем основное содержимое меню
+                mainMenuContent.setVisibility(View.GONE);
             }
         });
         
@@ -89,6 +95,17 @@ public class MainMenuActivity extends AppCompatActivity {
                 transaction.replace(R.id.fragmentContainer, helpFragment);
                 transaction.addToBackStack(null);
                 transaction.commit();
+                
+                // Скрываем основное содержимое меню
+                mainMenuContent.setVisibility(View.GONE);
+            }
+        });
+        
+        // Настраиваем слушатель для обработки возврата из фрагментов
+        getSupportFragmentManager().addOnBackStackChangedListener(() -> {
+            if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
+                // Если стек фрагментов пуст, показываем основное содержимое меню
+                mainMenuContent.setVisibility(View.VISIBLE);
             }
         });
     }
