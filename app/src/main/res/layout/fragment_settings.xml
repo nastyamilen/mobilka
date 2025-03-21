@@ -73,13 +73,6 @@
             android:layout_marginBottom="16dp">
 
             <RadioButton
-                android:id="@+id/smallGridRadioButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Маленькое (6x6)"
-                android:textSize="16sp"/>
-
-            <RadioButton
                 android:id="@+id/mediumGridRadioButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

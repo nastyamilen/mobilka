@@ -145,6 +145,12 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         
+        // Проверяем, что позиции соседние
+        if (!isAdjacent(pos1, pos2)) {
+            Log.e("MainActivity", "Positions are not adjacent: " + pos1 + ", " + pos2);
+            return;
+        }
+        
         isAnimating = true;
         gameAdapter.swapItems(pos1, pos2);
         
@@ -167,8 +173,13 @@ public class MainActivity extends AppCompatActivity {
     private boolean checkForMatches() {
         // Проверяем все позиции в сетке
         for (int position = 0; position < GRID_SIZE * GRID_SIZE; position++) {
-            if (gameAdapter.isPartOfMatch(position)) {
-                return true;
+            try {
+                if (gameAdapter.isPartOfMatch(position)) {
+                    Log.d("MainActivity", "Match found at position: " + position);
+                    return true;
+                }
+            } catch (Exception e) {
+                Log.e("MainActivity", "Error checking match at position " + position + ": " + e.getMessage());
             }
         }
         return false;
@@ -184,40 +195,52 @@ public class MainActivity extends AppCompatActivity {
         for (int position = 0; position < GRID_SIZE * GRID_SIZE; position++) {
             if (processedPositions.contains(position)) continue;
             
-            List<Integer> horizontalMatches = gameAdapter.getHorizontalMatchPositions(position);
-            if (!horizontalMatches.isEmpty()) {
-                processedPositions.addAll(horizontalMatches);
-                
-                // Удаляем все совпадающие элементы
-                for (int pos : horizontalMatches) {
-                    gameAdapter.removeGem(pos);
+            try {
+                List<Integer> horizontalMatches = gameAdapter.getHorizontalMatchPositions(position);
+                if (!horizontalMatches.isEmpty()) {
+                    processedPositions.addAll(horizontalMatches);
+                    
+                    // Удаляем все совпадающие элементы
+                    for (int pos : horizontalMatches) {
+                        if (pos >= 0 && pos < GRID_SIZE * GRID_SIZE) {
+                            gameAdapter.removeGem(pos);
+                        } else {
+                            Log.e("MainActivity", "Invalid position for removeGem: " + pos);
+                        }
+                    }
+                    
+                    // Обновляем счет (10 очков за каждый элемент)
+                    int scoreToAdd = horizontalMatches.size() * 10;
+                    updateScore(scoreToAdd);
+                    foundMatch = true;
+                    
+                    Log.d("MainActivity", "Horizontal match found with " + horizontalMatches.size() + 
+                                         " gems starting at position " + position + ". Added " + scoreToAdd + " points.");
                 }
                 
-                // Обновляем счет (10 очков за каждый элемент)
-                int scoreToAdd = horizontalMatches.size() * 10;
-                updateScore(scoreToAdd);
-                foundMatch = true;
-                
-                Log.d("MainActivity", "Horizontal match found with " + horizontalMatches.size() + 
-                                     " gems starting at position " + position + ". Added " + scoreToAdd + " points.");
-            }
-            
-            List<Integer> verticalMatches = gameAdapter.getVerticalMatchPositions(position);
-            if (!verticalMatches.isEmpty()) {
-                processedPositions.addAll(verticalMatches);
-                
-                // Удаляем все совпадающие элементы
-                for (int pos : verticalMatches) {
-                    gameAdapter.removeGem(pos);
+                List<Integer> verticalMatches = gameAdapter.getVerticalMatchPositions(position);
+                if (!verticalMatches.isEmpty()) {
+                    processedPositions.addAll(verticalMatches);
+                    
+                    // Удаляем все совпадающие элементы
+                    for (int pos : verticalMatches) {
+                        if (pos >= 0 && pos < GRID_SIZE * GRID_SIZE) {
+                            gameAdapter.removeGem(pos);
+                        } else {
+                            Log.e("MainActivity", "Invalid position for removeGem: " + pos);
+                        }
+                    }
+                    
+                    // Обновляем счет (10 очков за каждый элемент)
+                    int scoreToAdd = verticalMatches.size() * 10;
+                    updateScore(scoreToAdd);
+                    foundMatch = true;
+                    
+                    Log.d("MainActivity", "Vertical match found with " + verticalMatches.size() + 
+                                         " gems starting at position " + position + ". Added " + scoreToAdd + " points.");
                 }
-                
-                // Обновляем счет (10 очков за каждый элемент)
-                int scoreToAdd = verticalMatches.size() * 10;
-                updateScore(scoreToAdd);
-                foundMatch = true;
-                
-                Log.d("MainActivity", "Vertical match found with " + verticalMatches.size() + 
-                                     " gems starting at position " + position + ". Added " + scoreToAdd + " points.");
+            } catch (Exception e) {
+                Log.e("MainActivity", "Error processing matches at position " + position + ": " + e.getMessage());
             }
         }
 

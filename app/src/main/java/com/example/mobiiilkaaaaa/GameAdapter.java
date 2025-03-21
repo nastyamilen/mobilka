@@ -121,14 +121,32 @@ public class GameAdapter extends BaseAdapter {
         int row = position / gridSize;
         int col = position % gridSize;
         
+        // Проверяем, что позиция находится в пределах сетки
+        if (position < 0 || position >= gems.length) {
+            Log.e("GameAdapter", "Invalid position for horizontal match check: " + position);
+            return positions;
+        }
+        
         if (col > gridSize - 3) return positions;
         
         // Проверяем минимальное совпадение (3 в ряд)
-        if (gems[position] == null || 
-            gems[position + 1] == null || 
-            gems[position + 2] == null ||
-            !gems[position].equals(gems[position + 1]) || 
-            !gems[position].equals(gems[position + 2])) {
+        if (gems[position] == null) {
+            Log.e("GameAdapter", "Gem at position " + position + " is null");
+            return positions;
+        }
+        
+        // Проверяем, что следующие два элемента существуют и не null
+        if (position + 1 >= gems.length || position + 2 >= gems.length) {
+            Log.e("GameAdapter", "Position out of bounds for horizontal match: " + position);
+            return positions;
+        }
+        
+        if (gems[position + 1] == null || gems[position + 2] == null) {
+            Log.e("GameAdapter", "Adjacent gems are null for horizontal match at position: " + position);
+            return positions;
+        }
+        
+        if (!gems[position].equals(gems[position + 1]) || !gems[position].equals(gems[position + 2])) {
             return positions;
         }
         
@@ -139,9 +157,10 @@ public class GameAdapter extends BaseAdapter {
         
         // Проверяем дополнительные совпадения (4, 5 и т.д. в ряд)
         for (int i = 3; col + i < gridSize; i++) {
-            if (gems[position + i] != null && gems[position].equals(gems[position + i])) {
-                positions.add(position + i);
-                Log.d("GameAdapter", "Found additional horizontal match at position " + (position + i));
+            int nextPos = position + i;
+            if (nextPos < gems.length && gems[nextPos] != null && gems[position].equals(gems[nextPos])) {
+                positions.add(nextPos);
+                Log.d("GameAdapter", "Found additional horizontal match at position " + nextPos);
             } else {
                 break;
             }
@@ -158,27 +177,49 @@ public class GameAdapter extends BaseAdapter {
         List<Integer> positions = new ArrayList<>();
         int row = position / gridSize;
         
+        // Проверяем, что позиция находится в пределах сетки
+        if (position < 0 || position >= gems.length) {
+            Log.e("GameAdapter", "Invalid position for vertical match check: " + position);
+            return positions;
+        }
+        
         if (row > gridSize - 3) return positions;
         
         // Проверяем минимальное совпадение (3 в ряд)
-        if (gems[position] == null || 
-            gems[position + gridSize] == null || 
-            gems[position + gridSize * 2] == null ||
-            !gems[position].equals(gems[position + gridSize]) || 
-            !gems[position].equals(gems[position + gridSize * 2])) {
+        if (gems[position] == null) {
+            Log.e("GameAdapter", "Gem at position " + position + " is null");
+            return positions;
+        }
+        
+        // Проверяем, что следующие два элемента существуют и не null
+        int secondPos = position + gridSize;
+        int thirdPos = position + gridSize * 2;
+        
+        if (secondPos >= gems.length || thirdPos >= gems.length) {
+            Log.e("GameAdapter", "Position out of bounds for vertical match: " + position);
+            return positions;
+        }
+        
+        if (gems[secondPos] == null || gems[thirdPos] == null) {
+            Log.e("GameAdapter", "Adjacent gems are null for vertical match at position: " + position);
+            return positions;
+        }
+        
+        if (!gems[position].equals(gems[secondPos]) || !gems[position].equals(gems[thirdPos])) {
             return positions;
         }
         
         // Добавляем первые три позиции
         positions.add(position);
-        positions.add(position + gridSize);
-        positions.add(position + gridSize * 2);
+        positions.add(secondPos);
+        positions.add(thirdPos);
         
         // Проверяем дополнительные совпадения (4, 5 и т.д. в ряд)
         for (int i = 3; row + i < gridSize; i++) {
-            if (gems[position + gridSize * i] != null && gems[position].equals(gems[position + gridSize * i])) {
-                positions.add(position + gridSize * i);
-                Log.d("GameAdapter", "Found additional vertical match at position " + (position + gridSize * i));
+            int nextPos = position + gridSize * i;
+            if (nextPos < gems.length && gems[nextPos] != null && gems[position].equals(gems[nextPos])) {
+                positions.add(nextPos);
+                Log.d("GameAdapter", "Found additional vertical match at position " + nextPos);
             } else {
                 break;
             }
@@ -209,6 +250,14 @@ public class GameAdapter extends BaseAdapter {
         Log.d("GameAdapter", "Swapping gems at positions " + pos1 + " and " + pos2);
         Log.d("GameAdapter", "Gem at pos1: " + (gems[pos1] == null ? "null" : gems[pos1]) + 
                             ", Gem at pos2: " + (gems[pos2] == null ? "null" : gems[pos2]));
+        
+        // Проверяем, что оба элемента не null
+        if (gems[pos1] == null || gems[pos2] == null) {
+            Log.e("GameAdapter", "Cannot swap with null gem. Pos1: " + 
+                  (gems[pos1] == null ? "null" : gems[pos1]) + ", Pos2: " + 
+                  (gems[pos2] == null ? "null" : gems[pos2]));
+            return;
+        }
         
         Integer temp = gems[pos1];
         gems[pos1] = gems[pos2];

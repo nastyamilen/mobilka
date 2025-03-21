@@ -30,7 +30,6 @@ public class SettingsFragment extends Fragment {
     public static final int DIFFICULTY_HARD = 2;
     
     // Константы для размера сетки
-    public static final int GRID_SIZE_SMALL = 6;
     public static final int GRID_SIZE_MEDIUM = 8;
     public static final int GRID_SIZE_LARGE = 10;
     
@@ -100,9 +99,6 @@ public class SettingsFragment extends Fragment {
         // Загрузка размера сетки
         int gridSize = settings.getInt(GRID_SIZE_KEY, GRID_SIZE_MEDIUM);
         switch (gridSize) {
-            case GRID_SIZE_SMALL:
-                ((RadioButton) gridSizeRadioGroup.findViewById(R.id.smallGridRadioButton)).setChecked(true);
-                break;
             case GRID_SIZE_MEDIUM:
                 ((RadioButton) gridSizeRadioGroup.findViewById(R.id.mediumGridRadioButton)).setChecked(true);
                 break;
@@ -137,9 +133,7 @@ public class SettingsFragment extends Fragment {
         // Сохранение размера сетки
         int gridSize;
         int checkedGridSizeId = gridSizeRadioGroup.getCheckedRadioButtonId();
-        if (checkedGridSizeId == R.id.smallGridRadioButton) {
-            gridSize = GRID_SIZE_SMALL;
-        } else if (checkedGridSizeId == R.id.largeGridRadioButton) {
+        if (checkedGridSizeId == R.id.largeGridRadioButton) {
             gridSize = GRID_SIZE_LARGE;
         } else {
             gridSize = GRID_SIZE_MEDIUM;
@@ -195,7 +189,7 @@ public class SettingsFragment extends Fragment {
     /**
      * Получение размера игровой сетки
      * @param context Контекст приложения
-     * @return Размер сетки (6, 8 или 10)
+     * @return Размер сетки (8 или 10)
      */
     public static int getGridSize(Context context) {
         SharedPreferences settings = context.getSharedPreferences(SETTINGS_PREFS, Context.MODE_PRIVATE);
