@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -60,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
         
         // Устанавливаем размеры ячеек GridView
         int screenWidth = getResources().getDisplayMetrics().widthPixels;
-        int availableWidth = screenWidth - 48; // 48 = padding (16*2) + border padding (8*2)
+        int availableWidth = screenWidth - 40; // 48 = padding (16*2) + border padding (8*2)
         int cellSize = availableWidth / GRID_SIZE;
         
         Log.d("MainActivity", "Screen width: " + screenWidth + ", Cell size: " + cellSize);
