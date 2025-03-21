@@ -3,7 +3,10 @@ package com.example.mobiiilkaaaaa;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
@@ -41,6 +44,20 @@ public class MainMenuActivity extends AppCompatActivity {
             continueButton.setVisibility(View.GONE);
         }
 
+        // Загружаем анимации
+        Animation fadeInAnim = AnimationUtils.loadAnimation(this, R.anim.fade_in);
+        Animation slideUpAnim = AnimationUtils.loadAnimation(this, R.anim.slide_up);
+        
+        // Применяем анимацию к заголовку
+        bestScoreTextView.startAnimation(fadeInAnim);
+        
+        // Применяем анимацию к кнопкам с задержкой
+        new Handler().postDelayed(() -> startButton.startAnimation(slideUpAnim), 100);
+        new Handler().postDelayed(() -> continueButton.startAnimation(slideUpAnim), 200);
+        new Handler().postDelayed(() -> showScoresButton.startAnimation(slideUpAnim), 300);
+        new Handler().postDelayed(() -> settingsButton.startAnimation(slideUpAnim), 400);
+        new Handler().postDelayed(() -> helpButton.startAnimation(slideUpAnim), 500);
+
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -51,6 +68,7 @@ public class MainMenuActivity extends AppCompatActivity {
                 
                 Intent intent = new Intent(MainMenuActivity.this, MainActivity.class);
                 startActivity(intent);
+                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
             }
         });
         
@@ -60,6 +78,7 @@ public class MainMenuActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainMenuActivity.this, MainActivity.class);
                 intent.putExtra("continueGame", true);
                 startActivity(intent);
+                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
             }
         });
         
@@ -68,6 +87,7 @@ public class MainMenuActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intent = new Intent(MainMenuActivity.this, ScoresActivity.class);
                 startActivity(intent);
+                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
             }
         });
         
@@ -77,6 +97,10 @@ public class MainMenuActivity extends AppCompatActivity {
                 // Открываем фрагмент настроек
                 SettingsFragment settingsFragment = new SettingsFragment();
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.setCustomAnimations(
+                    R.anim.slide_up, R.anim.slide_down,
+                    R.anim.slide_up, R.anim.slide_down
+                );
                 transaction.replace(R.id.fragmentContainer, settingsFragment);
                 transaction.addToBackStack(null);
                 transaction.commit();
@@ -92,6 +116,10 @@ public class MainMenuActivity extends AppCompatActivity {
                 // Открываем фрагмент помощи
                 HelpFragment helpFragment = new HelpFragment();
                 FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.setCustomAnimations(
+                    R.anim.slide_up, R.anim.slide_down,
+                    R.anim.slide_up, R.anim.slide_down
+                );
                 transaction.replace(R.id.fragmentContainer, helpFragment);
                 transaction.addToBackStack(null);
                 transaction.commit();
@@ -106,6 +134,14 @@ public class MainMenuActivity extends AppCompatActivity {
             if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
                 // Если стек фрагментов пуст, показываем основное содержимое меню
                 mainMenuContent.setVisibility(View.VISIBLE);
+                
+                // Применяем анимацию к элементам меню при возврате
+                bestScoreTextView.startAnimation(fadeInAnim);
+                new Handler().postDelayed(() -> startButton.startAnimation(slideUpAnim), 100);
+                new Handler().postDelayed(() -> continueButton.startAnimation(slideUpAnim), 200);
+                new Handler().postDelayed(() -> showScoresButton.startAnimation(slideUpAnim), 300);
+                new Handler().postDelayed(() -> settingsButton.startAnimation(slideUpAnim), 400);
+                new Handler().postDelayed(() -> helpButton.startAnimation(slideUpAnim), 500);
             }
         });
     }
@@ -134,5 +170,11 @@ public class MainMenuActivity extends AppCompatActivity {
         DatabaseHelper dbHelper = DatabaseHelper.getInstance(this);
         int bestScore = dbHelper.getBestScore();
         bestScoreTextView.setText("Лучший результат: " + bestScore);
+    }
+    
+    @Override
+    public void finish() {
+        super.finish();
+        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
     }
 }

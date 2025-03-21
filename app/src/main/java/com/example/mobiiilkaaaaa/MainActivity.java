@@ -365,6 +365,24 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    public void onBackPressed() {
+        // Сохраняем состояние игры перед выходом
+        saveGameState();
+        
+        // Возвращаемся в главное меню
+        super.onBackPressed();
+        
+        // Добавляем анимацию перехода
+        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+    }
+    
+    @Override
+    public void finish() {
+        super.finish();
+        overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         // Возобновляем таймер, если он был приостановлен
