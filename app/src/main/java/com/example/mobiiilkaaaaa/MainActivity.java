@@ -51,8 +51,8 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Загружаем настройки
-        GRID_SIZE = SettingsFragment.getGridSize(this);
+        // Устанавливаем фиксированный размер сетки
+        GRID_SIZE = SettingsFragment.GRID_SIZE;
         INITIAL_TIME = SettingsFragment.getInitialTime(this);
         
         gridView = findViewById(R.id.gridView);
@@ -304,23 +304,9 @@ public class MainActivity extends AppCompatActivity {
     private void loadGameState() {
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         
-        // Проверяем, соответствует ли сохраненное состояние текущему размеру сетки
+        // Загружаем сохраненное состояние игры
         String gameState = prefs.getString(GAME_STATE_KEY, "");
         if (!gameState.isEmpty()) {
-            // Подсчитываем количество элементов в сохраненном состоянии
-            String[] gemStates = gameState.split(",");
-            int savedGridSize = (int) Math.sqrt(gemStates.length);
-            
-            // Если размер сетки изменился, начинаем новую игру вместо загрузки
-            if (savedGridSize != GRID_SIZE) {
-                Log.d("MainActivity", "Grid size changed from " + savedGridSize + " to " + GRID_SIZE + ". Starting new game.");
-                Toast.makeText(this, "Размер игрового поля изменен. Начинаем новую игру.", Toast.LENGTH_SHORT).show();
-                startGame();
-                startTimer();
-                return;
-            }
-            
-            // Загружаем состояние, если размер сетки не изменился
             gameAdapter.loadGameState(gameState);
             Log.d("MainActivity", "Game state loaded. Score: " + score);
         }

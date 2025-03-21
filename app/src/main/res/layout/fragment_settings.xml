@@ -57,56 +57,42 @@
                 android:textSize="16sp"/>
         </RadioGroup>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Размер игрового поля"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp"/>
-
-        <RadioGroup
-            android:id="@+id/gridSizeRadioGroup"
+        <!-- Разделитель -->
+        <View
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginBottom="16dp">
-
-            <RadioButton
-                android:id="@+id/mediumGridRadioButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Среднее (8x8)"
-                android:checked="true"
-                android:textSize="16sp"/>
-
-            <RadioButton
-                android:id="@+id/largeGridRadioButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Большое (10x10)"
-                android:textSize="16sp"/>
-        </RadioGroup>
-
-        <Button
-            android:id="@+id/saveSettingsButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Сохранить настройки"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"
+            android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp"/>
 
-        <Button
-            android:id="@+id/resetSettingsButton"
+        <!-- Кнопки управления -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Сбросить настройки"
-            android:layout_marginBottom="16dp"/>
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/saveSettingsButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Сохранить"
+                android:layout_marginEnd="8dp"/>
+
+            <Button
+                android:id="@+id/resetSettingsButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Сбросить"/>
+
+        </LinearLayout>
 
         <Button
             android:id="@+id/backToMenuFromSettingsButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Вернуться в меню"/>
+            android:text="Вернуться в меню"
+            android:layout_marginTop="16dp"/>
 
     </LinearLayout>
 </ScrollView>

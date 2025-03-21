@@ -19,16 +19,14 @@ public class SettingsFragment extends Fragment {
     
     private static final String SETTINGS_PREFS = "GameSettings";
     private static final String DIFFICULTY_KEY = "difficulty";
-    private static final String GRID_SIZE_KEY = "gridSize";
     
     // Константы для сложности
     public static final int DIFFICULTY_EASY = 0;
     public static final int DIFFICULTY_MEDIUM = 1;
     public static final int DIFFICULTY_HARD = 2;
     
-    // Константы для размера сетки
-    public static final int GRID_SIZE_MEDIUM = 8;
-    public static final int GRID_SIZE_LARGE = 10;
+    // Константа для размера сетки
+    public static final int GRID_SIZE = 8;
     
     // Время для каждой сложности (в миллисекундах)
     public static final long TIME_EASY = 90000; // 90 секунд
@@ -36,7 +34,6 @@ public class SettingsFragment extends Fragment {
     public static final long TIME_HARD = 30000; // 30 секунд
     
     private RadioGroup difficultyRadioGroup;
-    private RadioGroup gridSizeRadioGroup;
     private Button saveSettingsButton;
     private Button resetSettingsButton;
     private Button backToMenuButton;
@@ -53,7 +50,6 @@ public class SettingsFragment extends Fragment {
         
         // Инициализация UI элементов
         difficultyRadioGroup = view.findViewById(R.id.difficultyRadioGroup);
-        gridSizeRadioGroup = view.findViewById(R.id.gridSizeRadioGroup);
         saveSettingsButton = view.findViewById(R.id.saveSettingsButton);
         resetSettingsButton = view.findViewById(R.id.resetSettingsButton);
         backToMenuButton = view.findViewById(R.id.backToMenuFromSettingsButton);
@@ -88,17 +84,6 @@ public class SettingsFragment extends Fragment {
                 ((RadioButton) difficultyRadioGroup.findViewById(R.id.hardRadioButton)).setChecked(true);
                 break;
         }
-        
-        // Загрузка размера сетки
-        int gridSize = settings.getInt(GRID_SIZE_KEY, GRID_SIZE_MEDIUM);
-        switch (gridSize) {
-            case GRID_SIZE_MEDIUM:
-                ((RadioButton) gridSizeRadioGroup.findViewById(R.id.mediumGridRadioButton)).setChecked(true);
-                break;
-            case GRID_SIZE_LARGE:
-                ((RadioButton) gridSizeRadioGroup.findViewById(R.id.largeGridRadioButton)).setChecked(true);
-                break;
-        }
     }
     
     private void saveSettings() {
@@ -116,16 +101,6 @@ public class SettingsFragment extends Fragment {
         }
         editor.putInt(DIFFICULTY_KEY, difficulty);
         
-        // Сохранение размера сетки
-        int gridSize;
-        int checkedGridSizeId = gridSizeRadioGroup.getCheckedRadioButtonId();
-        if (checkedGridSizeId == R.id.largeGridRadioButton) {
-            gridSize = GRID_SIZE_LARGE;
-        } else {
-            gridSize = GRID_SIZE_MEDIUM;
-        }
-        editor.putInt(GRID_SIZE_KEY, gridSize);
-        
         editor.apply();
         
         Toast.makeText(requireContext(), "Настройки сохранены", Toast.LENGTH_SHORT).show();
@@ -134,12 +109,10 @@ public class SettingsFragment extends Fragment {
     private void resetSettings() {
         // Сброс к настройкам по умолчанию
         ((RadioButton) difficultyRadioGroup.findViewById(R.id.mediumRadioButton)).setChecked(true);
-        ((RadioButton) gridSizeRadioGroup.findViewById(R.id.mediumGridRadioButton)).setChecked(true);
         
         // Сохранение настроек по умолчанию
         SharedPreferences.Editor editor = settings.edit();
         editor.putInt(DIFFICULTY_KEY, DIFFICULTY_MEDIUM);
-        editor.putInt(GRID_SIZE_KEY, GRID_SIZE_MEDIUM);
         editor.apply();
         
         Toast.makeText(requireContext(), "Настройки сброшены", Toast.LENGTH_SHORT).show();
@@ -167,10 +140,9 @@ public class SettingsFragment extends Fragment {
     /**
      * Получение размера игровой сетки
      * @param context Контекст приложения
-     * @return Размер сетки (8 или 10)
+     * @return Размер сетки (8x8)
      */
     public static int getGridSize(Context context) {
-        SharedPreferences settings = context.getSharedPreferences(SETTINGS_PREFS, Context.MODE_PRIVATE);
-        return settings.getInt(GRID_SIZE_KEY, GRID_SIZE_MEDIUM);
+        return GRID_SIZE;
     }
 }
