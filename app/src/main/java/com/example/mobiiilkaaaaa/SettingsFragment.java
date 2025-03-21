@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.Switch;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -21,8 +20,6 @@ public class SettingsFragment extends Fragment {
     private static final String SETTINGS_PREFS = "GameSettings";
     private static final String DIFFICULTY_KEY = "difficulty";
     private static final String GRID_SIZE_KEY = "gridSize";
-    private static final String SOUND_EFFECTS_KEY = "soundEffects";
-    private static final String MUSIC_KEY = "music";
     
     // Константы для сложности
     public static final int DIFFICULTY_EASY = 0;
@@ -40,8 +37,6 @@ public class SettingsFragment extends Fragment {
     
     private RadioGroup difficultyRadioGroup;
     private RadioGroup gridSizeRadioGroup;
-    private Switch soundEffectsSwitch;
-    private Switch musicSwitch;
     private Button saveSettingsButton;
     private Button resetSettingsButton;
     private Button backToMenuButton;
@@ -59,8 +54,6 @@ public class SettingsFragment extends Fragment {
         // Инициализация UI элементов
         difficultyRadioGroup = view.findViewById(R.id.difficultyRadioGroup);
         gridSizeRadioGroup = view.findViewById(R.id.gridSizeRadioGroup);
-        soundEffectsSwitch = view.findViewById(R.id.soundEffectsSwitch);
-        musicSwitch = view.findViewById(R.id.musicSwitch);
         saveSettingsButton = view.findViewById(R.id.saveSettingsButton);
         resetSettingsButton = view.findViewById(R.id.resetSettingsButton);
         backToMenuButton = view.findViewById(R.id.backToMenuFromSettingsButton);
@@ -106,13 +99,6 @@ public class SettingsFragment extends Fragment {
                 ((RadioButton) gridSizeRadioGroup.findViewById(R.id.largeGridRadioButton)).setChecked(true);
                 break;
         }
-        
-        // Загрузка настроек звука
-        boolean soundEffects = settings.getBoolean(SOUND_EFFECTS_KEY, true);
-        boolean music = settings.getBoolean(MUSIC_KEY, true);
-        
-        soundEffectsSwitch.setChecked(soundEffects);
-        musicSwitch.setChecked(music);
     }
     
     private void saveSettings() {
@@ -140,10 +126,6 @@ public class SettingsFragment extends Fragment {
         }
         editor.putInt(GRID_SIZE_KEY, gridSize);
         
-        // Сохранение настроек звука
-        editor.putBoolean(SOUND_EFFECTS_KEY, soundEffectsSwitch.isChecked());
-        editor.putBoolean(MUSIC_KEY, musicSwitch.isChecked());
-        
         editor.apply();
         
         Toast.makeText(requireContext(), "Настройки сохранены", Toast.LENGTH_SHORT).show();
@@ -153,15 +135,11 @@ public class SettingsFragment extends Fragment {
         // Сброс к настройкам по умолчанию
         ((RadioButton) difficultyRadioGroup.findViewById(R.id.mediumRadioButton)).setChecked(true);
         ((RadioButton) gridSizeRadioGroup.findViewById(R.id.mediumGridRadioButton)).setChecked(true);
-        soundEffectsSwitch.setChecked(true);
-        musicSwitch.setChecked(true);
         
         // Сохранение настроек по умолчанию
         SharedPreferences.Editor editor = settings.edit();
         editor.putInt(DIFFICULTY_KEY, DIFFICULTY_MEDIUM);
         editor.putInt(GRID_SIZE_KEY, GRID_SIZE_MEDIUM);
-        editor.putBoolean(SOUND_EFFECTS_KEY, true);
-        editor.putBoolean(MUSIC_KEY, true);
         editor.apply();
         
         Toast.makeText(requireContext(), "Настройки сброшены", Toast.LENGTH_SHORT).show();
@@ -194,25 +172,5 @@ public class SettingsFragment extends Fragment {
     public static int getGridSize(Context context) {
         SharedPreferences settings = context.getSharedPreferences(SETTINGS_PREFS, Context.MODE_PRIVATE);
         return settings.getInt(GRID_SIZE_KEY, GRID_SIZE_MEDIUM);
-    }
-    
-    /**
-     * Проверка, включены ли звуковые эффекты
-     * @param context Контекст приложения
-     * @return true, если звуковые эффекты включены
-     */
-    public static boolean isSoundEffectsEnabled(Context context) {
-        SharedPreferences settings = context.getSharedPreferences(SETTINGS_PREFS, Context.MODE_PRIVATE);
-        return settings.getBoolean(SOUND_EFFECTS_KEY, true);
-    }
-    
-    /**
-     * Проверка, включена ли фоновая музыка
-     * @param context Контекст приложения
-     * @return true, если фоновая музыка включена
-     */
-    public static boolean isMusicEnabled(Context context) {
-        SharedPreferences settings = context.getSharedPreferences(SETTINGS_PREFS, Context.MODE_PRIVATE);
-        return settings.getBoolean(MUSIC_KEY, true);
     }
 }

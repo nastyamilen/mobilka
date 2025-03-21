@@ -105,7 +105,19 @@ public class GameAdapter extends BaseAdapter {
     }
 
     public boolean isPartOfMatch(int position) {
-        return isHorizontalMatch(position) || isVerticalMatch(position);
+        if (position < 0 || position >= gems.length || gems[position] == null) {
+            return false;
+        }
+        
+        try {
+            List<Integer> horizontalMatches = getHorizontalMatchPositions(position);
+            List<Integer> verticalMatches = getVerticalMatchPositions(position);
+            
+            return !horizontalMatches.isEmpty() || !verticalMatches.isEmpty();
+        } catch (Exception e) {
+            Log.e("GameAdapter", "Error in isPartOfMatch at position " + position + ": " + e.getMessage());
+            return false;
+        }
     }
 
     private boolean isHorizontalMatch(int position) {
@@ -285,59 +297,62 @@ public class GameAdapter extends BaseAdapter {
 
     public void dropGems() {
         Log.d("GameAdapter", "Dropping gems...");
-        // Process each column
+        boolean anyDropped = false;
+        
+        // Проходим по всем столбцам
         for (int col = 0; col < gridSize; col++) {
-            int emptyRow = gridSize - 1;
-            
-            // Move existing gems down
+            // Начинаем с нижней строки и двигаемся вверх
             for (int row = gridSize - 1; row >= 0; row--) {
                 int pos = row * gridSize + col;
                 
-                if (pos < 0 || pos >= gems.length) {
-                    Log.e("GameAdapter", "Invalid position during drop: " + pos);
+                if (pos >= gems.length) {
+                    Log.e("GameAdapter", "Position out of bounds in dropGems: " + pos);
                     continue;
                 }
                 
-                if (gems[pos] != null) {
-                    if (emptyRow != row) {
-                        // Move this gem down to the empty space
-                        int emptyPos = emptyRow * gridSize + col;
+                // Если ячейка пуста, ищем выше непустую ячейку для перемещения
+                if (gems[pos] == null) {
+                    for (int r = row - 1; r >= 0; r--) {
+                        int upperPos = r * gridSize + col;
                         
-                        if (emptyPos < 0 || emptyPos >= gems.length) {
-                            Log.e("GameAdapter", "Invalid empty position during drop: " + emptyPos);
+                        if (upperPos < 0 || upperPos >= gems.length) {
+                            Log.e("GameAdapter", "Upper position out of bounds in dropGems: " + upperPos);
                             continue;
                         }
                         
-                        Log.d("GameAdapter", "Moving gem from position " + pos + " to " + emptyPos);
-                        gems[emptyPos] = gems[pos];
-                        gems[pos] = null;
+                        if (gems[upperPos] != null) {
+                            // Перемещаем камень вниз
+                            gems[pos] = gems[upperPos];
+                            gems[upperPos] = null;
+                            anyDropped = true;
+                            break;
+                        }
                     }
-                    emptyRow--;
                 }
             }
             
-            // Fill empty spaces with new gems
-            for (int row = emptyRow; row >= 0; row--) {
+            // Заполняем пустые ячейки сверху новыми камнями
+            for (int row = 0; row < gridSize; row++) {
                 int pos = row * gridSize + col;
                 
-                if (pos < 0 || pos >= gems.length) {
-                    Log.e("GameAdapter", "Invalid position when filling empty spaces: " + pos);
+                if (pos >= gems.length) {
+                    Log.e("GameAdapter", "Position out of bounds when filling new gems: " + pos);
                     continue;
                 }
                 
-                gems[pos] = getRandomGem();
-                Log.d("GameAdapter", "Added new gem at position " + pos + ": " + gems[pos]);
+                if (gems[pos] == null) {
+                    gems[pos] = GEM_RESOURCES[random.nextInt(GEM_RESOURCES.length)];
+                    anyDropped = true;
+                }
             }
         }
         
-        // Ensure first element is always initialized
-        if (gems[0] == null) {
-            gems[0] = getRandomGem();
-            Log.d("GameAdapter", "Ensuring first gem is initialized after drop: " + gems[0]);
+        if (anyDropped) {
+            Log.d("GameAdapter", "Gems dropped and new ones added");
+            notifyDataSetChanged();
+        } else {
+            Log.d("GameAdapter", "No gems were dropped");
         }
-        
-        Log.d("GameAdapter", "Finished dropping gems");
-        notifyDataSetChanged();
     }
 
     @Override
@@ -359,34 +374,28 @@ public class GameAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         ImageView imageView;
         
-        int row = position / gridSize;
-        int col = position % gridSize;
-        
         if (convertView == null) {
             imageView = new ImageView(context);
             imageView.setLayoutParams(new GridView.LayoutParams(cellSize, cellSize));
             imageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-            imageView.setPadding(8, 8, 8, 8);
+            imageView.setPadding(4, 4, 4, 4);
         } else {
             imageView = (ImageView) convertView;
         }
         
-        Log.d("GameAdapter", "Getting view for position " + position + " (row: " + row + ", col: " + col + ")");
-        
-        if (position >= 0 && position < gems.length) {
-            if (gems[position] != null) {
-                imageView.setImageResource(gems[position]);
-                imageView.setVisibility(View.VISIBLE);
-                Log.d("GameAdapter", "Displaying gem at " + position + " (row: " + row + ", col: " + col + ")");
-            } else {
-                imageView.setVisibility(View.INVISIBLE);
-                Log.d("GameAdapter", "No gem to display at " + position + " (row: " + row + ", col: " + col + ")");
-            }
-        } else {
-            Log.e("GameAdapter", "Invalid position: " + position);
-            imageView.setVisibility(View.INVISIBLE);
+        if (position < 0 || position >= gems.length) {
+            Log.e("GameAdapter", "Invalid position in getView: " + position);
+            return imageView;
         }
-
+        
+        if (gems[position] != null) {
+            imageView.setImageResource(gems[position]);
+            imageView.setTag(gems[position]);
+        } else {
+            imageView.setImageDrawable(null);
+            imageView.setTag(null);
+        }
+        
         return imageView;
     }
 

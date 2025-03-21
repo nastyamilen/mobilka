@@ -86,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
             updateTimerText();
             gridView.setAdapter(gameAdapter);
             Log.d("MainActivity", "GridView adapter set");
+            startTimer();
         }
 
         // Настройка кнопки возврата в главное меню
@@ -125,7 +126,6 @@ public class MainActivity extends AppCompatActivity {
         });
         
         // Запускаем таймер
-        startTimer();
     }
 
     private boolean isAdjacent(int pos1, int pos2) {
@@ -316,6 +316,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("MainActivity", "Grid size changed from " + savedGridSize + " to " + GRID_SIZE + ". Starting new game.");
                 Toast.makeText(this, "Размер игрового поля изменен. Начинаем новую игру.", Toast.LENGTH_SHORT).show();
                 startGame();
+                startTimer();
                 return;
             }
             
@@ -340,6 +341,9 @@ public class MainActivity extends AppCompatActivity {
                 gameAdapter.notifyDataSetChanged();
             }
         });
+        
+        // Запускаем таймер
+        startTimer();
     }
 
     private void startTimer() {
@@ -461,13 +465,22 @@ public class MainActivity extends AppCompatActivity {
     }
     
     private void startGame() {
-        score = 0;
+        // Начинаем новую игру
         updateScore(0);
+        score = 0;
         timeLeftInMillis = INITIAL_TIME;
         updateTimerText();
-        gameAdapter.resetGame();
+        
+        // Создаем новый адаптер с правильным размером сетки
+        gameAdapter = new GameAdapter(this, GRID_SIZE);
+        
+        // Устанавливаем размеры ячеек GridView
+        int screenWidth = getResources().getDisplayMetrics().widthPixels;
+        int availableWidth = screenWidth - 40; // 40 = padding (20*2)
+        int cellSize = availableWidth / GRID_SIZE;
+        gameAdapter.setCellSize(cellSize);
+        
         gridView.setAdapter(gameAdapter);
-        Log.d("MainActivity", "GridView adapter set");
-        startTimer();
+        Log.d("MainActivity", "New game started with grid size: " + GRID_SIZE);
     }
 }
