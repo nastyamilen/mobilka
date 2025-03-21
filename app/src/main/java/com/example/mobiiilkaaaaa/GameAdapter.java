@@ -346,6 +346,15 @@ public class GameAdapter extends BaseAdapter {
         Log.d("GameAdapter", "Cell size set to: " + size);
     }
 
+    // Метод для сброса игры
+    public void resetGame() {
+        // Пересоздаем массив камней с текущим размером сетки
+        this.gems = new Integer[gridSize * gridSize];
+        Log.d("GameAdapter", "Resetting game with gridSize: " + gridSize + ", total elements: " + (gridSize * gridSize));
+        initializeBoard();
+        notifyDataSetChanged();
+    }
+
     // Методы для сохранения и загрузки состояния игры
     public String saveGameState() {
         StringBuilder state = new StringBuilder();

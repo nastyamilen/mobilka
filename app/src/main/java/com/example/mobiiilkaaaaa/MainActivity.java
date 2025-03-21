@@ -280,15 +280,29 @@ public class MainActivity extends AppCompatActivity {
 
     private void loadGameState() {
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        score = prefs.getInt(SCORE_KEY, 0);
-        updateScore(0);
         
-        // Загружаем состояние камней
+        // Проверяем, соответствует ли сохраненное состояние текущему размеру сетки
         String gameState = prefs.getString(GAME_STATE_KEY, "");
         if (!gameState.isEmpty()) {
+            // Подсчитываем количество элементов в сохраненном состоянии
+            String[] gemStates = gameState.split(",");
+            int savedGridSize = (int) Math.sqrt(gemStates.length);
+            
+            // Если размер сетки изменился, начинаем новую игру вместо загрузки
+            if (savedGridSize != GRID_SIZE) {
+                Log.d("MainActivity", "Grid size changed from " + savedGridSize + " to " + GRID_SIZE + ". Starting new game.");
+                Toast.makeText(this, "Размер игрового поля изменен. Начинаем новую игру.", Toast.LENGTH_SHORT).show();
+                startGame();
+                return;
+            }
+            
+            // Загружаем состояние, если размер сетки не изменился
             gameAdapter.loadGameState(gameState);
             Log.d("MainActivity", "Game state loaded. Score: " + score);
         }
+        
+        score = prefs.getInt(SCORE_KEY, 0);
+        updateScore(0);
         
         timeLeftInMillis = prefs.getLong(TIMER_KEY, INITIAL_TIME);
         updateTimerText();
@@ -421,5 +435,16 @@ public class MainActivity extends AppCompatActivity {
             dbHelper.addScore(score);
             Log.d("MainActivity", "Score saved to database on onDestroy: " + score + ", is new record: " + isNewRecord);
         }
+    }
+    
+    private void startGame() {
+        score = 0;
+        updateScore(0);
+        timeLeftInMillis = INITIAL_TIME;
+        updateTimerText();
+        gameAdapter.resetGame();
+        gridView.setAdapter(gameAdapter);
+        Log.d("MainActivity", "GridView adapter set");
+        startTimer();
     }
 }
